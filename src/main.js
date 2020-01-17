@@ -6,9 +6,24 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import promise from 'es6-promise'
+import '@vant/touch-emulator'
 promise.polyfill()
-import { NavBar } from 'vant'
+import { NavBar,Dialog,Row, Col, Icon,Tabbar, TabbarItem,Button,Tag,RadioGroup, Radio,Swipe, SwipeItem } from 'vant'
 Vue.use(NavBar);
+Vue.use(Dialog);
+Vue.use(Row);
+Vue.use(Col);
+Vue.use(Icon);
+Vue.use(Tabbar);
+Vue.use(TabbarItem);
+Vue.use(Button);
+Vue.use(Tag);
+Vue.use(RadioGroup);
+Vue.use(Radio);
+
+Vue.use(Swipe);
+Vue.use(SwipeItem);
+Vue.prototype.$dialog = Dialog
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
