@@ -10,19 +10,53 @@
   fixed
   />
   <div class="-body">
-    <van-swipe @change="onChange">
+    <van-swipe @change="onChange" ref="next" :loop="false">
       <van-swipe-item class="item-padding" v-for="item in data" :key="item.id">
         <div class="tags">
           <van-tag mark type="primary">{{item.type===0?"单选题":"多选题"}}</van-tag>
         </div>
         <div class="topic-title van-hairline--bottom">{{item.title}}</div>
         <div class="topic-action">
+<!-- :disabled="item.disable" -->
+
           <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.type===0" @change="onChangeRadio($event,item)">
-            <van-radio class="checked-list" v-for="(items,index) in item.answer" :name="items" icon-size="0.68rem" :key="items+index">{{caseType[index]+'.'+items}}</van-radio>
+            <van-radio class="checked-list" v-for="(items,index) in item.answer" :name="items.name" icon-size="0.68rem" :key="items+index">
+
+              <img
+                v-if="items.checked == 1"
+                class="custom-icon"
+                slot="icon"
+                slot-scope="props"
+                :src="activeIcon"
+              >
+              <img
+                v-else-if="items.checked == 2"
+                class="custom-icon"
+                slot="icon"
+                slot-scope="props"
+                :src="erractiveIcon"
+              >
+              <img
+                v-else
+                class="custom-icon"
+                slot="icon"
+                slot-scope="props"
+                :src="inactiveIcon"
+              >
+              {{caseType[index]+'.'+items.name}}
+            </van-radio>
           </van-radio-group>
 
           <van-checkbox-group v-model="item.result" v-else>
-            <van-checkbox class="checked-list" v-for="(items,index) in item.answer" :name="items" icon-size="0.68rem" :key="items+index">{{caseType[index]+'.'+items}}</van-checkbox>
+            <van-checkbox class="checked-list" v-for="(items,index) in item.answer" :name="items.name" icon-size="0.68rem" :key="items+index">
+              <img
+                class="custom-icon"
+                slot="icon"
+                slot-scope="props"
+                :src="props.checked ? activeIcon : inactiveIcon"
+              >
+              {{caseType[index]+'.'+items.name}}
+            </van-checkbox>
           </van-checkbox-group>
 
           <div style="padding:20px;" v-if="item.type===1">
@@ -46,11 +80,11 @@
     <van-tabbar-item>
       <span class="num-text">
         <van-icon class="icon-custon" name="close" color="red" />
-        <span class="icon-text">0</span>
+        <span class="icon-text">{{error}}</span>
       </span>
       <span>
         <van-icon class="icon-custon" name="passed" color="#07c160" />
-        <span class="icon-text">0</span>
+        <span class="icon-text">{{right}}</span>
       </span>
     </van-tabbar-item>
     <van-tabbar-item>
@@ -66,6 +100,11 @@
 export default {
   data() {
     return {
+      right:0,
+      error:0,
+      activeIcon: require('@/assets/icon/radiobutton.png'),
+      inactiveIcon: require('@/assets/icon/radiooff.png'),
+      erractiveIcon: require('@/assets/icon/cuowu-tianchong.png'),
       active:'null',
       radio:1,
       result:[],
@@ -75,12 +114,82 @@ export default {
       caseType:["A","B","C","D","E","F"],
       data:[
         {
+          id:0,
+          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。0',
+          type:0,
+          result:[],
+          checked:'单选题 1',
+          disable:false,
+          answer:[
+            {
+              name:'单选题 1',
+              checked:0
+            },
+            {
+              name:'单选题 2',
+              checked:0
+            },
+            {
+              name:'单选题 3',
+              checked:0
+            },
+            {
+              name:'单选题 4',
+              checked:0
+            }
+          ]
+        },
+        {
           id:1,
           title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。1',
           type:0,
           result:[],
+          checked:'单选题 2',
           disable:false,
-          answer:["单选题 1","单选题 2","单选题 3","单选题 4"]
+          answer:[
+            {
+              name:'单选题 1',
+              checked:0
+            },
+            {
+              name:'单选题 2',
+              checked:0
+            },
+            {
+              name:'单选题 3',
+              checked:0
+            },
+            {
+              name:'单选题 4',
+              checked:0
+            }
+          ]
+        },
+        {
+          id:6,
+          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。1',
+          type:0,
+          result:[],
+          checked:'单选题 6',
+          disable:false,
+          answer:[
+            {
+              name:'单选题 1',
+              checked:0
+            },
+            {
+              name:'单选题 2',
+              checked:0
+            },
+            {
+              name:'单选题 6',
+              checked:0
+            },
+            {
+              name:'单选题 4',
+              checked:0
+            }
+          ]
         },
         {
           id:2,
@@ -88,7 +197,24 @@ export default {
           type:1,
           result:[],
           disable:false,
-          answer:["多选题 1","多选题 2","多选题 3","多选题 4"]
+          answer:[
+            {
+              name:'单选题 1',
+              checked:0
+            },
+            {
+              name:'单选题 2',
+              checked:0
+            },
+            {
+              name:'单选题 3',
+              checked:0
+            },
+            {
+              name:'单选题 4',
+              checked:0
+            }
+          ]
         },
         {
           id:3,
@@ -96,7 +222,24 @@ export default {
           type:0,
           result:[],
           disable:false,
-          answer:["单选题 1","单选题 2","单选题 3","单选题 4"]
+          answer:[
+            {
+              name:'单选题 1',
+              checked:0
+            },
+            {
+              name:'单选题 2',
+              checked:0
+            },
+            {
+              name:'单选题 3',
+              checked:0
+            },
+            {
+              name:'单选题 4',
+              checked:0
+            }
+          ]
         },
         {
           id:4,
@@ -104,15 +247,49 @@ export default {
           type:1,
           result:[],
           disable:false,
-          answer:["多选题 1","多选题 2","多选题 3","多选题 4"]
+          answer:[
+            {
+              name:'单选题 1',
+              checked:0
+            },
+            {
+              name:'单选题 2',
+              checked:0
+            },
+            {
+              name:'单选题 3',
+              checked:0
+            },
+            {
+              name:'单选题 4',
+              checked:0
+            }
+          ]
         }
       ]
     }
   } ,
   methods: {
     onChangeRadio(e,item){
-      console.log(e);
+
       item.disable = true;
+      if(e == item.checked){
+        this.right+=1;
+      }
+      item.answer.forEach(el=>{
+
+        if(el.name == item.checked){
+          el.checked = 1;
+        }
+        if(e == el.name && e !== item.checked){
+          el.checked = 2;
+          this.error+=1;
+          console.log('e');
+        }
+      })
+      setTimeout(_=>{
+        this.$refs.next.next();
+      },500)
     },
     onChange(index) {
       this.current = index;
@@ -275,5 +452,8 @@ export default {
 }
 /deep/ .van-radio__label--disabled {
     color: #323233;
+}
+.custom-icon{
+  height: 0.68rem;
 }
 </style>
