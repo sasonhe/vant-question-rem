@@ -5,7 +5,6 @@
   :title="'倒计时 '+minutes+' : '+second"
   left-text=""
   right-text=""
-  left-arrow
   @click-left="onClickLeft"
   @click-right="onClickRight"
   fixed
@@ -18,17 +17,17 @@
         </div>
         <div class="topic-title van-hairline--bottom">{{item.title}}</div>
         <div class="topic-action">
-          <van-radio-group v-model="item.result" v-if="item.type===0">
-            <van-radio class="checked-list" v-for="(items,index) in item.answer" :name="items" icon-size="0.68rem" :key="items+index">{{items}}</van-radio>
+          <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.type===0" @change="onChangeRadio($event,item)">
+            <van-radio class="checked-list" v-for="(items,index) in item.answer" :name="items" icon-size="0.68rem" :key="items+index">{{caseType[index]+'.'+items}}</van-radio>
           </van-radio-group>
 
           <van-checkbox-group v-model="item.result" v-else>
-            <van-checkbox class="checked-list" v-for="(items,index) in item.answer" :name="items" icon-size="0.68rem" :key="items+index">{{items}}</van-checkbox>
+            <van-checkbox class="checked-list" v-for="(items,index) in item.answer" :name="items" icon-size="0.68rem" :key="items+index">{{caseType[index]+'.'+items}}</van-checkbox>
           </van-checkbox-group>
 
           <div style="padding:20px;" v-if="item.type===1">
-            <van-button type="info" round size="normal" block v-if="item.result">确定</van-button>
-            <van-button type="info" round size="normal" disable block v-else>确定</van-button>
+            <van-button type="info" round size="normal" block v-if="item.result.length>=2">确定</van-button>
+            <van-button type="info" round size="normal" disabled block v-else>确定</van-button>
           </div>
         </div>
       </van-swipe-item>
@@ -73,35 +72,48 @@ export default {
       current: 0,
       minutes: 60, //分
       seconds: 0, //秒
+      caseType:["A","B","C","D","E","F"],
       data:[
         {
           id:1,
           title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。1',
           type:0,
+          result:[],
+          disable:false,
           answer:["单选题 1","单选题 2","单选题 3","单选题 4"]
         },
         {
           id:2,
           title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。2',
           type:1,
+          result:[],
+          disable:false,
           answer:["多选题 1","多选题 2","多选题 3","多选题 4"]
         },
         {
           id:3,
           title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。3',
           type:0,
+          result:[],
+          disable:false,
           answer:["单选题 1","单选题 2","单选题 3","单选题 4"]
         },
         {
           id:4,
           title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。4',
           type:1,
+          result:[],
+          disable:false,
           answer:["多选题 1","多选题 2","多选题 3","多选题 4"]
         }
       ]
     }
   } ,
   methods: {
+    onChangeRadio(e,item){
+      console.log(e);
+      item.disable = true;
+    },
     onChange(index) {
       this.current = index;
     },
@@ -229,7 +241,7 @@ export default {
   padding: 4px 0;
 }
 .checked-list{
-  padding: 8px 0;
+  margin: 15px 0;
   font-size: 18px;
 }
 .topic-title{
@@ -256,5 +268,12 @@ export default {
     height: .68rem;
     line-height: .68rem;
     font-size: 16px;
+}
+/deep/ .van-radio__icon--disabled .van-icon {
+    background-color: transparent;
+    border-color: #c8c9cc;
+}
+/deep/ .van-radio__label--disabled {
+    color: #323233;
 }
 </style>
