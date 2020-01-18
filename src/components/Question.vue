@@ -17,13 +17,21 @@
         </div>
         <div class="topic-title van-hairline--bottom">{{item.title}}</div>
         <div class="topic-action">
-          <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.type===0" @change="onChangeRadio($event,item)">
+
+          <div class="custom-radio">
+            <div class="custom-radio__icon">
+              <van-icon name="circle" color="#c8c9cc"/>
+            </div>
+            <span class="custom-radio__label">单选框 1</span>
+          </div>
+
+          <!-- <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.type===0" @change="onChangeRadio($event,item)">
             <van-radio class="checked-list" v-for="(items,index) in item.answer" :name="items" icon-size="0.68rem" :key="items+index">{{caseType[index]+'.'+items}}</van-radio>
           </van-radio-group>
 
           <van-checkbox-group v-model="item.result" v-else>
             <van-checkbox class="checked-list" v-for="(items,index) in item.answer" :name="items" icon-size="0.68rem" :key="items+index">{{caseType[index]+'.'+items}}</van-checkbox>
-          </van-checkbox-group>
+          </van-checkbox-group> -->
 
           <div style="padding:20px;" v-if="item.type===1">
             <van-button type="info" round size="normal" block v-if="item.result.length>=2">确定</van-button>
@@ -263,7 +271,7 @@ export default {
   box-sizing: border-box;
   overflow: auto;
 }
-/deep/ .van-radio__label,/deep/ .van-checkbox__label{
+/* /deep/ .van-radio__label,/deep/ .van-checkbox__label{
   display: inline-block;
     height: .68rem;
     line-height: .68rem;
@@ -275,5 +283,35 @@ export default {
 }
 /deep/ .van-radio__label--disabled {
     color: #323233;
+} */
+
+.custom-radio:not(:last-child) {
+    margin-bottom: 10px;
+}
+.custom-radio {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    overflow: hidden;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+}
+.custom-radio__icon {
+    -webkit-box-flex: 0;
+    -webkit-flex: none;
+    flex: none;
+    height: 1em;
+    font-size: 20px;
+    line-height: 1em;
+    cursor: pointer;
+}
+.custom-radio__label {
+    margin-left: 8px;
+    color: #323233;
+    line-height: 20px;
 }
 </style>
