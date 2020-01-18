@@ -12,25 +12,26 @@
   />
   <div class="-body">
     <van-swipe @change="onChange">
-      <van-swipe-item class="item-padding">
+      <van-swipe-item class="item-padding" v-for="item in data" :key="item.id">
         <div class="tags">
-          <van-tag mark type="primary">单选题</van-tag>
+          <van-tag mark type="primary">{{item.type===0?"单选题":"多选题"}}</van-tag>
         </div>
-        <div class="topic-title van-hairline--bottom">
-          在变(配)电站、发电厂、电力线路等场所的( )工作，应同时遵守《国家电网公司电力安全工作规程》的变电、配电、线路等相应部分。
-        </div>
+        <div class="topic-title van-hairline--bottom">{{item.title}}</div>
         <div class="topic-action">
-          <van-radio-group v-model="radio">
-            <van-radio class="checked-list" name="1" icon-size="24px">A.单选框 1</van-radio>
-            <van-radio class="checked-list" name="2" icon-size="24px">B.单选框 2</van-radio>
-            <van-radio class="checked-list" name="3" icon-size="24px">C.单选框 3</van-radio>
-            <van-radio class="checked-list" name="4" icon-size="24px">D.单选框 4</van-radio>
+          <van-radio-group v-model="item.result" v-if="item.type===0">
+            <van-radio class="checked-list" v-for="(items,index) in item.answer" :name="items" icon-size="0.68rem" :key="items+index">{{items}}</van-radio>
           </van-radio-group>
+
+          <van-checkbox-group v-model="item.result" v-else>
+            <van-checkbox class="checked-list" v-for="(items,index) in item.answer" :name="items" icon-size="0.68rem" :key="items+index">{{items}}</van-checkbox>
+          </van-checkbox-group>
+
+          <div style="padding:20px;" v-if="item.type===1">
+            <van-button type="info" round size="normal" block v-if="item.result">确定</van-button>
+            <van-button type="info" round size="normal" disable block v-else>确定</van-button>
+          </div>
         </div>
       </van-swipe-item>
-      <van-swipe-item>2</van-swipe-item>
-      <van-swipe-item>3</van-swipe-item>
-      <van-swipe-item>4</van-swipe-item>
 
       <div class="custom-indicator" slot="indicator"></div>
     </van-swipe>
@@ -55,7 +56,7 @@
     </van-tabbar-item>
     <van-tabbar-item>
       <van-icon class="icon-custon" name="share" />
-      <span class="icon-text">{{current+1}}/100</span>
+      <span class="icon-text">{{current+1}}/{{data.length}}</span>
     </van-tabbar-item>
   </van-tabbar>
 
@@ -68,9 +69,36 @@ export default {
     return {
       active:'null',
       radio:1,
+      result:[],
       current: 0,
       minutes: 60, //分
       seconds: 0, //秒
+      data:[
+        {
+          id:1,
+          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。1',
+          type:0,
+          answer:["单选题 1","单选题 2","单选题 3","单选题 4"]
+        },
+        {
+          id:2,
+          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。2',
+          type:1,
+          answer:["多选题 1","多选题 2","多选题 3","多选题 4"]
+        },
+        {
+          id:3,
+          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。3',
+          type:0,
+          answer:["单选题 1","单选题 2","单选题 3","单选题 4"]
+        },
+        {
+          id:4,
+          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。4',
+          type:1,
+          answer:["多选题 1","多选题 2","多选题 3","多选题 4"]
+        }
+      ]
     }
   } ,
   methods: {
@@ -99,7 +127,7 @@ export default {
         cancelButtonText:'取消'
       }).then(() => {
         // on confirm
-
+        console.log(this.data);
       }).catch(() => {
         // on cancel
       });
@@ -172,7 +200,7 @@ export default {
 }
 .icon-custon{
   min-width: 1em;
-  font-size: 16px;
+  font-size: 20px;
   line-height: 42px;
   vertical-align: top;
 }
@@ -180,6 +208,7 @@ export default {
   display: inline-block;
   line-height: 42px;
   vertical-align: top;
+  font-size: 16px;
 }
 .num-text{
   display: inline-block;
@@ -205,8 +234,9 @@ export default {
 }
 .topic-title{
   padding: 10px 0;
-  font-size: 18px;
+  font-size: 16px;
   margin-bottom: 15px;
+  text-align: justify;
 }
 .van-swipe{
   font-size: 14px;
@@ -219,5 +249,12 @@ export default {
 .item-padding{
   padding: 0 15px;
   box-sizing: border-box;
+  overflow: auto;
+}
+/deep/ .van-radio__label,/deep/ .van-checkbox__label{
+  display: inline-block;
+    height: .68rem;
+    line-height: .68rem;
+    font-size: 16px;
 }
 </style>

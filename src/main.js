@@ -8,7 +8,7 @@ import router from './router'
 import promise from 'es6-promise'
 import '@vant/touch-emulator'
 promise.polyfill()
-import { NavBar,Dialog,Row, Col, Icon,Tabbar, TabbarItem,Button,Tag,RadioGroup, Radio,Swipe, SwipeItem } from 'vant'
+import { NavBar,Dialog,Row, Col, Icon,Tabbar, TabbarItem,Button,Tag,RadioGroup, Radio,Swipe, SwipeItem,Checkbox, CheckboxGroup } from 'vant'
 Vue.use(NavBar);
 Vue.use(Dialog);
 Vue.use(Row);
@@ -23,6 +23,8 @@ Vue.use(Radio);
 
 Vue.use(Swipe);
 Vue.use(SwipeItem);
+Vue.use(Checkbox);
+Vue.use(CheckboxGroup);
 Vue.prototype.$dialog = Dialog
 Vue.config.productionTip = false
 
