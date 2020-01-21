@@ -47,9 +47,26 @@
             </van-radio>
           </van-radio-group>
 
-          <van-checkbox-group v-model="item.result" v-else>
+          <van-checkbox-group :disabled="item.disable" v-model="item.result" v-else>
             <van-checkbox class="checked-list" v-for="(items,index) in item.answer" :name="items.name" icon-size="0.68rem" :key="items+index">
               <img
+                v-if="items.checked == 1"
+                class="custom-icon"
+                slot="icon"
+                slot-scope="props"
+                :src="activeIcon"
+              >
+
+              <img
+                v-else-if="items.checked == 2"
+                class="custom-icon"
+                slot="icon"
+                slot-scope="props"
+                :src="erractiveIcon"
+              >
+
+              <img
+                v-else
                 class="custom-icon"
                 slot="icon"
                 slot-scope="props"
@@ -60,8 +77,7 @@
           </van-checkbox-group>
 
           <div style="padding:20px;" v-if="item.type===1">
-            <van-button type="info" round size="normal" block v-if="item.result.length>=2">确定</van-button>
-            <van-button type="info" round size="normal" disabled block v-else>确定</van-button>
+            <van-button type="info" round size="normal" :disabled="item.result.length>=2?false:true" block v-on:click="clickResult(item)">确定</van-button>
           </div>
         </div>
       </van-swipe-item>
@@ -113,6 +129,32 @@ export default {
       seconds: 0, //秒
       caseType:["A","B","C","D","E","F"],
       data:[
+        {
+          id:2,
+          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。2',
+          type:1,
+          result:[],
+          checked:["多选题3","多选题4"],
+          disable:false,
+          answer:[
+            {
+              name:'多选题1',
+              checked:0
+            },
+            {
+              name:'多选题2',
+              checked:0
+            },
+            {
+              name:'多选题3',
+              checked:0
+            },
+            {
+              name:'多选题4',
+              checked:0
+            }
+          ]
+        },
         {
           id:0,
           title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。0',
@@ -192,31 +234,6 @@ export default {
           ]
         },
         {
-          id:2,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。2',
-          type:1,
-          result:[],
-          disable:false,
-          answer:[
-            {
-              name:'单选题 1',
-              checked:0
-            },
-            {
-              name:'单选题 2',
-              checked:0
-            },
-            {
-              name:'单选题 3',
-              checked:0
-            },
-            {
-              name:'单选题 4',
-              checked:0
-            }
-          ]
-        },
-        {
           id:3,
           title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。3',
           type:0,
@@ -246,30 +263,74 @@ export default {
           title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。4',
           type:1,
           result:[],
+          checked:["多选题1","多选题3","多选题2"],
           disable:false,
           answer:[
             {
-              name:'单选题 1',
+              name:'多选题1',
               checked:0
             },
             {
-              name:'单选题 2',
+              name:'多选题2',
               checked:0
             },
             {
-              name:'单选题 3',
+              name:'多选题3',
               checked:0
             },
             {
-              name:'单选题 4',
+              name:'多选题4',
               checked:0
             }
           ]
         }
       ]
     }
-  } ,
+  },
   methods: {
+    clickResult(data){
+      if (data.disable) {
+        return
+      }
+      setTimeout(_=>{
+        this.$refs.next.next();
+      },500)
+      data.disable = true;
+      let {result,checked,answer} = data;
+
+      checked.filter((v,i,arr)=>{
+        answer.forEach(el=>{
+          if (el.name === v) {
+            el.checked = 1;
+          }
+        })
+      })
+      let newArr = result.concat(checked);
+      checked.filter((v,i,arr)=>{
+        newArr.filter((el,index,ags)=>{
+          if (v === el) {
+            newArr.splice(index,1,'item')
+          }
+        })
+      })
+      newArr.forEach(el=>{
+        answer.forEach(item=>{
+          if (el === item.name) {
+            item.checked = 2;
+          }
+        })
+      })
+      let i = 0
+      while (answer[i]){
+        if (answer[i].checked==2) {
+          this.error+=1;
+          return
+        }
+        i++
+      }
+      this.right+=1;
+    },
+
     onChangeRadio(e,item){
 
       item.disable = true;
@@ -284,7 +345,6 @@ export default {
         if(e == el.name && e !== item.checked){
           el.checked = 2;
           this.error+=1;
-          console.log('e');
         }
       })
       setTimeout(_=>{
@@ -455,5 +515,8 @@ export default {
 }
 .custom-icon{
   height: 0.68rem;
+}
+/deep/ .van-checkbox__label--disabled {
+    color: #323233;
 }
 </style>
