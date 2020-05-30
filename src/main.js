@@ -8,7 +8,7 @@ import router from './router'
 import promise from 'es6-promise'
 import '@vant/touch-emulator'
 promise.polyfill()
-import { NavBar,Dialog,Row, Col, Icon,Tabbar, TabbarItem,Button,Tag,RadioGroup, Radio,Swipe, SwipeItem,Checkbox, CheckboxGroup } from 'vant'
+import { NavBar,Dialog,Row, Col, Icon,Tabbar, TabbarItem,Button,Tag,RadioGroup, Radio,Swipe, SwipeItem,Checkbox, CheckboxGroup,Cell, CellGroup,Toast  } from 'vant'
 Vue.use(NavBar);
 Vue.use(Dialog);
 Vue.use(Row);
@@ -25,7 +25,11 @@ Vue.use(Swipe);
 Vue.use(SwipeItem);
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
+Vue.use(Cell);
+Vue.use(CellGroup);
+Vue.use(Toast);
 Vue.prototype.$dialog = Dialog
+Vue.prototype.$toast = Toast
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */

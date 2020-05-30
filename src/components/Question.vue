@@ -17,7 +17,6 @@
         </div>
         <div class="topic-title van-hairline--bottom">{{item.title}}</div>
         <div class="topic-action">
-<!-- :disabled="item.disable" -->
 
           <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.type===0" @change="onChangeRadio($event,item)">
             <van-radio class="checked-list" v-for="(items,index) in item.answer" :name="items.name" icon-size="0.68rem" :key="items+index">
@@ -88,7 +87,7 @@
 
 
   </div>
-  <van-tabbar v-model="active" active-color="#646566">
+  <van-tabbar v-model="active" class="tabbar" active-color="#646566">
     <van-tabbar-item @click="onClickRight()">
       <van-icon class="icon-custon" name="notes-o" color="#07c160" />
       <span class="icon-text">交卷</span>
@@ -125,13 +124,13 @@ export default {
       radio:1,
       result:[],
       current: 0,
-      minutes: 60, //分
+      minutes: 1, //分
       seconds: 0, //秒
       caseType:["A","B","C","D","E","F"],
       data:[
         {
           id:2,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。2',
+          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。C、D',
           type:1,
           result:[],
           checked:["多选题3","多选题4"],
@@ -157,7 +156,7 @@ export default {
         },
         {
           id:0,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。0',
+          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。A',
           type:0,
           result:[],
           checked:'单选题 1',
@@ -183,7 +182,7 @@ export default {
         },
         {
           id:1,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。1',
+          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。B',
           type:0,
           result:[],
           checked:'单选题 2',
@@ -209,7 +208,7 @@ export default {
         },
         {
           id:6,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。1',
+          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。C',
           type:0,
           result:[],
           checked:'单选题 6',
@@ -235,9 +234,10 @@ export default {
         },
         {
           id:3,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。3',
+          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。D',
           type:0,
           result:[],
+          checked:'单选题 4',
           disable:false,
           answer:[
             {
@@ -260,7 +260,7 @@ export default {
         },
         {
           id:4,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。4',
+          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。A、B、C',
           type:1,
           result:[],
           checked:["多选题1","多选题3","多选题2"],
@@ -385,10 +385,14 @@ export default {
     num(n) {
       // 倒计时结束重新刷新页面
       if (this.minutes === 0 && this.seconds === 2) {
-        this.$message.warning('支付倒计时结束!即将刷新页面!');
+        this.$toast({
+          message:'时间到，即将提交结束答题',
+          duration:3000,
+          position:'top',
+        });
       }
       if (this.minutes === 0 && this.seconds === 0) {
-        window.location.reload();
+        // window.location.reload();
       }
       return n < 10 ? '0' + n : '' + n;
     },
@@ -411,6 +415,11 @@ export default {
   mounted() {
     // 倒计时
     this.timer();
+    this.$toast({
+      message:'请开始答题',
+      duration:3000,
+      position:'top',
+    });
   },
   watch: {
     // 倒计时
@@ -519,4 +528,9 @@ export default {
 /deep/ .van-checkbox__label--disabled {
     color: #323233;
 }
+.tabbar{
+  max-width: 20rem;
+  left: auto;
+}
+
 </style>

@@ -10,7 +10,7 @@ export default new Router({
     {
       path: '/',
       name: 'Index',
-      redirect: '/toquestion',
+      // redirect: '/toquestion',
       component: Index
     },
     {
