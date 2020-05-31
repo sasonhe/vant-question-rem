@@ -20,3 +20,16 @@ npm run build --report
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
 # vant-question-rem
+
+# rem
+// set 1rem = viewWidth / 10
+function setRemUnit () {
+  var rem = docEl.clientWidth / 10
+  if(docEl.clientWidth >= 1024){
+    docEl.style.fontSize = 48 + 'px'
+    return;
+  }
+  docEl.style.fontSize = rem + 'px'
+}
+
+setRemUnit()

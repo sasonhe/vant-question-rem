@@ -10,9 +10,9 @@
               <th class="num">排名</th>
               <th>姓名</th>
               <th>轮次</th>
-              <th>最高分</th>
+              <!-- <th>最高分</th>
               <th>最低分</th>
-              <th>平均分</th>
+              <th>平均分</th> -->
               <th>总分数</th>
             </tr>
           </thead>
@@ -23,9 +23,9 @@
               </td>
               <td>{{item.urlsname}}</td>
               <td>{{item.rurns}}</td>
-              <td>{{item.maxScore}}</td>
+              <!-- <td>{{item.maxScore}}</td>
               <td>{{item.minScore}}</td>
-              <td>{{item.averageScore}}</td>
+              <td>{{item.averageScore}}</td> -->
               <td>{{item.sumScore}}</td>
             </tr>
           </tbody>
@@ -68,9 +68,12 @@ export default {
 
 <style scoped>
 .view {
+  height: 100vh;
   padding-top: 10px;
   max-width: 1200px;
   margin: 0 auto;
+  overflow: auto;
+  box-sizing: border-box;
 }
 .view-wrapper{
   position: absolute;

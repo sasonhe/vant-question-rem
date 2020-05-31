@@ -366,7 +366,7 @@ export default {
         }else{
           this.$notify({
             type: 'danger',
-            message: '获取信息失败',
+            message: res.errmsg,
             duration:0
           })
         }
@@ -498,7 +498,7 @@ export default {
         }else{
           this.$notify({
             type: 'danger',
-            message: '提交信息失败',
+            message: res.errmsg,
             duration:0
           })
         }
