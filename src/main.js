@@ -7,8 +7,9 @@ import App from './App'
 import router from './router'
 import promise from 'es6-promise'
 import '@vant/touch-emulator'
+import api from '@/api/'
 promise.polyfill()
-import { NavBar,Dialog,Row, Col, Icon,Tabbar, TabbarItem,Button,Tag,RadioGroup, Radio,Swipe, SwipeItem,Checkbox, CheckboxGroup,Cell, CellGroup,Toast  } from 'vant'
+import { NavBar,Dialog,Row, Col, Icon,Tabbar, TabbarItem,Button,Tag,RadioGroup, Radio,Swipe, SwipeItem,Checkbox, CheckboxGroup,Cell, CellGroup,Toast,Notify   } from 'vant'
 Vue.use(NavBar);
 Vue.use(Dialog);
 Vue.use(Row);
@@ -28,9 +29,13 @@ Vue.use(CheckboxGroup);
 Vue.use(Cell);
 Vue.use(CellGroup);
 Vue.use(Toast);
+Vue.use(Notify);
 Vue.prototype.$dialog = Dialog
 Vue.prototype.$toast = Toast
+Vue.prototype.$notify = Notify
 Vue.config.productionTip = false
+
+Vue.prototype.$http = api
 
 /* eslint-disable no-new */
 new Vue({

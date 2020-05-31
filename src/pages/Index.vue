@@ -5,15 +5,15 @@
       <img class="img" :src="img" alt="">
     </div>
     <div class="name">
-      某某某
+      {{name}}
     </div>
   </div>
   <div class="body">
     <van-cell-group>
-      <van-cell title="答题类型" value="单选/多选" />
-      <van-cell title="答题规则" value="100题，45分钟" />
-      <van-cell title="排名规则" value="按分排序" />
-      <van-cell title="出题规则" value="随机分配" />
+      <van-cell title="答题类型" value="单选/复选" />
+      <van-cell title="答题规则" :value="`${subjectSum}题，${subjectTime/60}分钟`" />
+      <van-cell title="答题轮次" :value="`第${numbers}轮`" />
+      <van-cell title="出题规则" :value="subjectOrder" />
     </van-cell-group>
     <div class="tips">
       温馨提示：答题后不能修改答案，答完一题自动进入下一题，答题时间结束自动提交
@@ -30,12 +30,50 @@ export default {
   data(){
     return{
       img:require('@/assets/user.png'),
+      name:'',//姓名
+      subjectSum:0,//总题目
+      subjectTime:0,//时长
+      subjectOrder:null,//出题规则
+      numbers:0,
+      uid:''
     }
+  },
+  created(){
+    let uid = this.$route.query.uid;
+    if(uid){
+      this.uid = uid
+      let data = {
+        id:uid
+      }
+      this.getInfo(data)
+    }
+
   },
   methods:{
     enter(){
+      if(!this.uid) return
       this.$router.push({
-        path:'/toquestion'
+        path:'/toquestion',
+        query:{
+          uid:this.uid
+        }
+      })
+    },
+    getInfo(data){
+      this.$http.getQuestionList(data).then(res => {
+        if(res.errcode === 0){
+          this.name = res.name;
+          this.subjectSum = res.subjectSum;
+          this.subjectTime = res.subjectTime;
+          this.subjectOrder = res.subjectOrder === 1?'随机':'顺序';
+          this.numbers = res.numbers
+        }else{
+          this.$notify({
+            type: 'danger',
+            message: '获取信息失败',
+            duration:0
+          })
+        }
       })
     }
   }
@@ -67,6 +105,7 @@ export default {
 }
 .btn-warpper{
   margin-top: 20px;
+  margin-bottom: 20px;
 }
 .btn{
   width: 100px;

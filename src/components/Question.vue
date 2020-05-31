@@ -4,22 +4,25 @@
   class="timer"
   :title="'倒计时 '+minutes+' : '+second"
   left-text=""
-  right-text=""
+  :right-text="fractions+'分'"
   @click-left="onClickLeft"
   @click-right="onClickRight"
   fixed
   />
   <div class="-body">
     <van-swipe @change="onChange" ref="next" :loop="false">
-      <van-swipe-item class="item-padding" v-for="item in data" :key="item.id">
+      <van-swipe-item class="item-padding" v-for="(item,index) in dataList" :key="item.id">
         <div class="tags">
-          <van-tag mark type="primary">{{item.type===0?"单选题":"多选题"}}</van-tag>
+          <van-tag mark type="primary">{{item.anType===1?"单选题":"多选题"}}</van-tag>
         </div>
-        <div class="topic-title van-hairline--bottom">{{item.title}}</div>
+        <div class="topic-title van-hairline--bottom">
+          <!-- <span class="numIndex">{{index+1}}</span> -->
+          {{item.anName}}
+        </div>
         <div class="topic-action">
 
-          <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.type===0" @change="onChangeRadio($event,item)">
-            <van-radio class="checked-list" v-for="(items,index) in item.answer" :name="items.name" icon-size="0.68rem" :key="items+index">
+          <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.anType===0" @change="onChangeRadio($event,item)">
+            <van-radio class="checked-list" v-for="(items,index) in item.childList" :name="items.flag" icon-size="0.68rem" :key="items.id">
 
               <img
                 v-if="items.checked == 1"
@@ -42,12 +45,12 @@
                 slot-scope="props"
                 :src="inactiveIcon"
               >
-              {{caseType[index]+'.'+items.name}}
+              {{caseType[index]+'.'+items.flag}}
             </van-radio>
           </van-radio-group>
 
           <van-checkbox-group :disabled="item.disable" v-model="item.result" v-else>
-            <van-checkbox class="checked-list" v-for="(items,index) in item.answer" :name="items.name" icon-size="0.68rem" :key="items+index">
+            <van-checkbox class="checked-list" v-for="(items,index) in item.childList" :name="items.flag" icon-size="0.68rem" :key="items.id">
               <img
                 v-if="items.checked == 1"
                 class="custom-icon"
@@ -71,11 +74,11 @@
                 slot-scope="props"
                 :src="props.checked ? activeIcon : inactiveIcon"
               >
-              {{caseType[index]+'.'+items.name}}
+              {{items.flag}}
             </van-checkbox>
           </van-checkbox-group>
 
-          <div style="padding:20px;" v-if="item.type===1">
+          <div style="padding:20px;" v-if="item.anType===2">
             <van-button type="info" round size="normal" :disabled="item.result.length>=2?false:true" block v-on:click="clickResult(item)">确定</van-button>
           </div>
         </div>
@@ -104,7 +107,7 @@
     </van-tabbar-item>
     <van-tabbar-item>
       <van-icon class="icon-custon" name="share" />
-      <span class="icon-text">{{current+1}}/{{data.length}}</span>
+      <span class="icon-text">{{current+1}}/{{dataList.length}}</span>
     </van-tabbar-item>
   </van-tabbar>
 
@@ -112,9 +115,18 @@
 </template>
 
 <script>
+import { utf8_to_b64 } from '@/utils/crypt'
 export default {
   data() {
     return {
+      dataList:[],
+      fractions:0,
+      name:'',
+      userId:'',
+      turn:'',
+      expoId:'',
+      ruleId:'',
+      uid:'',
       right:0,
       error:0,
       activeIcon: require('@/assets/icon/radiobutton.png'),
@@ -287,8 +299,95 @@ export default {
       ]
     }
   },
+  created(){
+    let uid = this.$route.query.uid;
+    if(uid){
+      this.uid = uid
+      let data = {
+        id:uid
+      }
+      this.getInfo(data)
+    }
+  },
   methods: {
+    getInfo(data){
+      this.$http.getQuestionList(data).then(res => {
+        if(res.errcode === 0){
+          let data = res.data;
+          let logTime = res.logTime/60;//时长(秒)
+          let userId = res.userId;//选手ID
+          let numbers = res.numbers;//轮数
+          let expoId = res.expoId;//活动ID
+          let name = res.name;//选手姓名
+          let ruleId = res.ruleId;//规则ID
+          this.userId = userId
+          this.numbers = numbers
+          this.name = name
+          this.expoId = expoId
+          this.ruleId = ruleId
+          data.forEach((item,index,ary) => {
+            item.result = []
+            item.disable = false;
+            let trueAnswer = item.trueAnswer;
+            if(item.anType === 1) {
+              //单选
+              item.checked = ''
+              item.childList.forEach(el => {
+                el.checked = 0;
+                let ans = el.flag;
+                if(ans.indexOf(v) != -1){
+                  item.checked = ans
+                }
+              })
+            }
+            if(item.anType === 2) {
+              //复选
+              item.checked = []
+              item.childList.forEach(el => {
+                el.checked = 0;
+                let ans = el.flag;
+                let ary = trueAnswer.split('')
+                ary.forEach(v=>{
+                  if(ans.indexOf(v) != -1){
+                    item.checked.push(ans)
+                  }
+                })
+              })
+            }
+          })
+          this.dataList = data
+          // 倒计时
+          this.timer();
+          this.$toast({
+            message:'请开始答题',
+            duration:3000,
+            position:'top',
+          });
+        }else{
+          this.$notify({
+            type: 'danger',
+            message: '获取信息失败',
+            duration:0
+          })
+        }
+      })
+    },
     clickResult(data){
+      if(this.current === this.dataList.length -1){
+        setTimeout(_=>{
+          this.$dialog.confirm({
+            title: '温馨提示',
+            message: '当前已是最后一题，答完请交卷',
+            confirmButtonText:'交卷',
+            cancelButtonText:'继续答题'
+          }).then(() => {
+            // on confirm
+            this.submit()
+          }).catch(() => {
+            // on cancel
+          });
+        },1000)
+      }
       if (data.disable) {
         return
       }
@@ -296,11 +395,11 @@ export default {
         this.$refs.next.next();
       },500)
       data.disable = true;
-      let {result,checked,answer} = data;
+      let {result,checked,childList,fractions} = data;
 
       checked.filter((v,i,arr)=>{
-        answer.forEach(el=>{
-          if (el.name === v) {
+        childList.forEach(el=>{
+          if (el.flag === v) {
             el.checked = 1;
           }
         })
@@ -314,21 +413,23 @@ export default {
         })
       })
       newArr.forEach(el=>{
-        answer.forEach(item=>{
-          if (el === item.name) {
+        childList.forEach(item=>{
+          if (el === item.flag) {
             item.checked = 2;
           }
         })
       })
       let i = 0
-      while (answer[i]){
-        if (answer[i].checked==2) {
+      while (childList[i]){
+        if (childList[i].checked==2) {
           this.error+=1;
           return
         }
         i++
       }
+      this.fractions += parseInt(fractions)
       this.right+=1;
+
     },
 
     onChangeRadio(e,item){
@@ -339,10 +440,10 @@ export default {
       }
       item.answer.forEach(el=>{
 
-        if(el.name == item.checked){
+        if(el.flag == item.checked){
           el.checked = 1;
         }
-        if(e == el.name && e !== item.checked){
+        if(e == el.flag && e !== item.checked){
           el.checked = 2;
           this.error+=1;
         }
@@ -350,6 +451,59 @@ export default {
       setTimeout(_=>{
         this.$refs.next.next();
       },500)
+      if(this.current === this.dataList.length -1){
+        setTimeout(_=>{
+          // this.$dialog.confirm({
+          //   title: '温馨提示',
+          //   message: '当前已是最后一题，答完请交卷',
+          //   confirmButtonText:'交卷',
+          //   cancelButtonText:'继续答题'
+          // }).then(() => {
+          //   // on confirm
+          //   this.submit()
+          // }).catch(() => {
+          //   // on cancel
+          // });
+          this.$dialog.confirm({
+            title: '温馨提示',
+            message: '当前已是最后一题，答完请交卷',
+            confirmButtonText:'交卷',
+            cancelButtonText:'继续答题',
+            beforeClose:(action, done) => {
+              console.log(action);
+            }
+          })
+        },1000)
+      }
+    },
+    submit(){
+      let data = {
+        id:this.userId,
+        turn:this.numbers,
+        name:this.name,
+        expoId:this.expoId,
+        ruleId:this.ruleId,
+        sumScore:this.fractions
+      }
+      this.$http.insertScore(data).then(res => {
+        if(res.errcode === 0){
+          let name = utf8_to_b64(this.name)
+          let fractions = utf8_to_b64(this.fractions)
+          this.$router.push({
+            path:`/success/${name}/${fractions}`,
+            query:{
+              uid:this.uid
+            }
+          })
+        }else{
+          this.$notify({
+            type: 'danger',
+            message: '提交信息失败',
+            duration:0
+          })
+        }
+      })
+
     },
     onChange(index) {
       this.current = index;
@@ -376,7 +530,8 @@ export default {
         cancelButtonText:'取消'
       }).then(() => {
         // on confirm
-        console.log(this.data);
+        console.log(0);
+        this.submit()
       }).catch(() => {
         // on cancel
       });
@@ -392,7 +547,7 @@ export default {
         });
       }
       if (this.minutes === 0 && this.seconds === 0) {
-        // window.location.reload();
+        this.submit()
       }
       return n < 10 ? '0' + n : '' + n;
     },
@@ -413,13 +568,7 @@ export default {
     },
   },
   mounted() {
-    // 倒计时
-    this.timer();
-    this.$toast({
-      message:'请开始答题',
-      duration:3000,
-      position:'top',
-    });
+
   },
   watch: {
     // 倒计时
@@ -451,6 +600,10 @@ export default {
 </script>
 
 <style scoped>
+.timer{
+  max-width: 1024px;
+  left: auto;
+}
 .timer .van-nav-bar__title{
   font-size: 14px;
   font-weight: 400;
@@ -529,8 +682,11 @@ export default {
     color: #323233;
 }
 .tabbar{
-  max-width: 20rem;
+  max-width: 1024px;
   left: auto;
 }
+.numIndex{
+  display: inline-block;
 
+}
 </style>
