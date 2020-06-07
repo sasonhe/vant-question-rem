@@ -5,7 +5,7 @@
       <img class="img" :src="img" alt="">
     </div>
     <div class="name">
-      {{b64_to_utf8(name)}}
+      {{(name)}}
     </div>
   </div>
   <div class="body">
@@ -14,14 +14,13 @@
       数据提交成功
     </div>
     <div class="btn-warpper">
-      <div class="btn">{{b64_to_utf8(fractions)}}分</div>
+      <div class="btn">{{(fractions)}}分</div>
     </div>
   </div>
 </div>
 </template>
 
 <script>
-import { b64_to_utf8 } from '@/utils/crypt'
 export default {
   props:{
     name:{
@@ -36,7 +35,6 @@ export default {
   data(){
     return{
       img:require('@/assets/user.png'),
-      b64_to_utf8
     }
   },
   created(){

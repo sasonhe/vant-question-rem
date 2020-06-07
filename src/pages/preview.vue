@@ -2,7 +2,7 @@
   <div class="view-wrapper">
     <div class="view">
       <div class="title">竞赛活动排名</div>
-      <!-- <div class="mtitle">第 1 轮</div> -->
+      <div class="mtitle">(当前第 {{this.turn}} 轮)</div>
       <div class="list">
         <table class="table">
           <thead>
@@ -31,6 +31,13 @@
           </tbody>
         </table>
       </div>
+      <div class="btn-list">
+        <van-row>
+          <van-col class="btn-w" span="8"><van-button @click="setList(1)" class="btn" size="large" style="color:#4397c1" type="default">上一轮</van-button></van-col>
+          <van-col class="btn-w" span="8"><van-button @click="setList(2)" class="btn" size="large" style="color:#4397c1" type="default">启动</van-button></van-col>
+          <van-col class="btn-w" span="8"><van-button @click="setList(3)" class="btn" size="large" style="color:#4397c1" type="default">下一轮</van-button></van-col>
+        </van-row>
+      </div>
     </div>
   </div>
 </template>
@@ -40,7 +47,10 @@ export default {
   data(){
     return {
       expoid:'',
-      data:[]
+      data:[],
+      turn:1,
+      type:0,
+      time:null
     }
   },
   created(){
@@ -51,17 +61,79 @@ export default {
     }
 
   },
+  mounted(){
+    window.clearInterval(this.time);
+    this.timer()
+  },
   methods:{
     getList(){
       let data = {
-        expoId:this.expoid
+        expoId:this.expoid,
+        turn:this.$route.query.turn || 1,
+        type:this.type
       }
       this.$http.getList(data).then( res => {
         if(res.errcode === 0){
           this.data = res.data
+          this.turn = res.numbers
         }
       })
-    }
+    },
+    setList(flog){
+      let data
+      if(flog === 1 && this.$route.query.turn === 1) return
+      if(flog === 1) {
+        data = {
+          expoId:this.expoid,
+          turn:this.turn === 1 ? 1 : this.turn - 1,
+          type:0
+        }
+      }
+      if(flog === 2) {
+        data = {
+          expoId:this.expoid,
+          turn:this.turn,
+          type:1
+        }
+      }
+      if(flog === 3) {
+        data = {
+          expoId:this.expoid,
+          turn:this.turn + 1,
+          type:2
+        }
+      }
+      this.$http.setList(data).then( res => {
+        if(res.errcode === 0){
+          if(!this.$route.query.start){
+            this.$notify({
+              type: 'primary',
+              message: '启动成功',
+              duration: 3000,
+            });
+          }
+          this.$router.push({
+            query:{
+              expoid:this.expoid,
+              turn:data.turn,
+              type:this.type,
+              start:'s'
+            }
+          })
+        }else {
+          this.$notify({
+            type: 'danger',
+            message: res.errmsg,
+            duration:3000
+          })
+        }
+      })
+    },
+    timer() {
+      this.time = window.setInterval(()=> {
+        this.getList()
+      }, 3000);
+    },
   }
 }
 </script>
@@ -91,7 +163,7 @@ export default {
   margin-bottom: 10px;
 }
 .mtitle{
-  font-size: 30px;
+  font-size: 24px;
   font-weight: bold;
   color: #fff;
   text-align: center;
@@ -129,5 +201,16 @@ export default {
   border-radius: 50%;
   text-align: center;
   line-height: 40px;
+}
+.btn-list{
+  padding: 15px 10px;
+}
+.btn-w{
+  text-align: center;
+}
+.btn{
+  width: 120px;
+  font-weight: bold;
+  cursor: pointer;
 }
 </style>

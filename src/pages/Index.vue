@@ -4,22 +4,21 @@
     <div class="user">
       <img class="img" :src="img" alt="">
     </div>
-    <div class="name">
-      {{name}}
-    </div>
   </div>
   <div class="body">
-    <van-cell-group>
-      <van-cell title="答题类型" value="单选/复选" />
-      <van-cell title="答题规则" :value="`${subjectSum}题，${subjectTime/60}分钟`" />
-      <van-cell title="答题轮次" :value="`第${numbers}轮`" />
-      <van-cell title="出题规则" :value="subjectOrder" />
-    </van-cell-group>
     <div class="tips">
-      温馨提示：答题后不能修改答案，答完一题自动进入下一题，答题时间结束自动提交
+      <div>温馨提示：</div>
+      <div>选择对应名称后开始答题</div>
+      <div>答题后不能修改答案，答完一题自动进入下一题</div>
     </div>
-    <div class="btn-warpper">
-      <div class="btn" @click="enter">开始答题</div>
+    <div class="nameList">
+      <van-row gutter="20">
+        <van-col span="8" class="span" v-for="item in nameList" :key="item.id">
+          <div class="btn" @click="clickName(item)">
+            {{item.username}}
+          </div>
+        </van-col>
+      </van-row>
     </div>
   </div>
 </div>
@@ -35,7 +34,8 @@ export default {
       subjectTime:0,//时长
       subjectOrder:null,//出题规则
       numbers:0,
-      uid:''
+      uid:'',
+      nameList:[]
     }
   },
   created(){
@@ -43,30 +43,27 @@ export default {
     if(uid){
       this.uid = uid
       let data = {
-        id:uid
+        expoId:uid
       }
       this.getInfo(data)
     }
 
   },
   methods:{
-    enter(){
-      if(!this.uid) return
+    clickName(item){
       this.$router.push({
         path:'/toquestion',
         query:{
-          uid:this.uid
+          expoId:item.expoId,
+          uid:item.id,
+          username:item.username
         }
       })
     },
     getInfo(data){
       this.$http.getQuestionList(data).then(res => {
         if(res.errcode === 0){
-          this.name = res.name;
-          this.subjectSum = res.subjectSum;
-          this.subjectTime = res.subjectTime;
-          this.subjectOrder = res.subjectOrder === 1?'随机':'顺序';
-          this.numbers = res.numbers
+          this.nameList = res.data;
         }else{
           this.$notify({
             type: 'danger',
@@ -91,7 +88,7 @@ export default {
   width:100px;
   height: 100px;
   margin: 0 auto;
-  padding-top: 20px;
+  padding-top: 40px;
 }
 .user .img{
   width: 100%;
@@ -103,19 +100,11 @@ export default {
   text-align: center;
   padding-top: 15px;
 }
-.btn-warpper{
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
 .btn{
+  padding: 10px 2px;
   width: 100px;
-  height: 100px;
-  border-radius: 50%;
   background: #759b67;
-  font-size: 18px;
-  line-height: 100px;
-  text-align: center;
-  font-weight: bold;
+  font-size: 16px;
   color: #fff;
   margin: 0 auto;
   cursor: pointer;
@@ -123,6 +112,16 @@ export default {
 .tips{
   font-size: 14px;
   color: #9e9e9e;
-  padding: 20px 15px;
+  padding: 20px 15px 5px 15px;
+}
+.tips div{
+  line-height: 20px;
+}
+.nameList{
+  padding: 20px 15px
+}
+.span{
+  text-align: center;
+  margin-bottom: 10px;
 }
 </style>

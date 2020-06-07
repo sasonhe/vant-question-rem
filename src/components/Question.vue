@@ -1,12 +1,11 @@
 <template>
+  <!-- :title="'倒计时 '+minutes+' : '+second" -->
 <div class="question">
   <van-nav-bar
   class="timer"
-  :title="'倒计时 '+minutes+' : '+second"
+  :title="name"
   left-text=""
   :right-text="fractions+'分'"
-  @click-left="onClickLeft"
-  @click-right="onClickRight"
   fixed
   />
   <div class="-body">
@@ -21,7 +20,7 @@
         </div>
         <div class="topic-action">
 
-          <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.anType===0" @change="onChangeRadio($event,item)">
+          <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.anType===1" @change="onChangeRadio($event,item)">
             <van-radio class="checked-list" v-for="(items,index) in item.childList" :name="items.flag" icon-size="0.68rem" :key="items.id">
 
               <img
@@ -45,7 +44,7 @@
                 slot-scope="props"
                 :src="inactiveIcon"
               >
-              {{caseType[index]+'.'+items.flag}}
+              {{items.flag}}
             </van-radio>
           </van-radio-group>
 
@@ -115,7 +114,6 @@
 </template>
 
 <script>
-import { utf8_to_b64 } from '@/utils/crypt'
 export default {
   data() {
     return {
@@ -125,7 +123,6 @@ export default {
       userId:'',
       turn:'',
       expoId:'',
-      ruleId:'',
       uid:'',
       right:0,
       error:0,
@@ -300,31 +297,34 @@ export default {
     }
   },
   created(){
+    let expoId = this.$route.query.expoId;
     let uid = this.$route.query.uid;
-    if(uid){
+    let username = this.$route.query.username;
+    if(uid && expoId && username){
       this.uid = uid
+      this.expoId = expoId
+      this.username = username
       let data = {
-        id:uid
+        expoId:expoId,
+        uid:uid,
+        username:username
       }
       this.getInfo(data)
     }
   },
   methods: {
     getInfo(data){
-      this.$http.getQuestionList(data).then(res => {
+      this.$http.findSwer(data).then(res => {
         if(res.errcode === 0){
           let data = res.data;
-          let logTime = res.logTime/60;//时长(秒)
           let userId = res.userId;//选手ID
           let numbers = res.numbers;//轮数
           let expoId = res.expoId;//活动ID
           let name = res.name;//选手姓名
-          let ruleId = res.ruleId;//规则ID
           this.userId = userId
           this.numbers = numbers
           this.name = name
           this.expoId = expoId
-          this.ruleId = ruleId
           data.forEach((item,index,ary) => {
             item.result = []
             item.disable = false;
@@ -335,7 +335,7 @@ export default {
               item.childList.forEach(el => {
                 el.checked = 0;
                 let ans = el.flag;
-                if(ans.indexOf(v) != -1){
+                if(ans.indexOf(trueAnswer) != -1){
                   item.checked = ans
                 }
               })
@@ -367,7 +367,7 @@ export default {
           this.$notify({
             type: 'danger',
             message: res.errmsg,
-            duration:0
+            duration:8000,
           })
         }
       })
@@ -396,7 +396,6 @@ export default {
       },500)
       data.disable = true;
       let {result,checked,childList,fractions} = data;
-
       checked.filter((v,i,arr)=>{
         childList.forEach(el=>{
           if (el.flag === v) {
@@ -437,8 +436,9 @@ export default {
       item.disable = true;
       if(e == item.checked){
         this.right+=1;
+        this.fractions += parseInt(item.fractions)
       }
-      item.answer.forEach(el=>{
+      item.childList.forEach(el=>{
 
         if(el.flag == item.checked){
           el.checked = 1;
@@ -453,26 +453,18 @@ export default {
       },500)
       if(this.current === this.dataList.length -1){
         setTimeout(_=>{
-          // this.$dialog.confirm({
-          //   title: '温馨提示',
-          //   message: '当前已是最后一题，答完请交卷',
-          //   confirmButtonText:'交卷',
-          //   cancelButtonText:'继续答题'
-          // }).then(() => {
-          //   // on confirm
-          //   this.submit()
-          // }).catch(() => {
-          //   // on cancel
-          // });
           this.$dialog.confirm({
             title: '温馨提示',
             message: '当前已是最后一题，答完请交卷',
             confirmButtonText:'交卷',
             cancelButtonText:'继续答题',
-            beforeClose:(action, done) => {
-              console.log(action);
-            }
-          })
+
+          }).then(() => {
+            // on confirm
+            this.submit()
+          }).catch(() => {
+            // on cancel
+          });
         },1000)
       }
     },
@@ -482,15 +474,13 @@ export default {
         turn:this.numbers,
         name:this.name,
         expoId:this.expoId,
-        ruleId:this.ruleId,
         sumScore:this.fractions
       }
+
       this.$http.insertScore(data).then(res => {
         if(res.errcode === 0){
-          let name = utf8_to_b64(this.name)
-          let fractions = utf8_to_b64(this.fractions)
           this.$router.push({
-            path:`/success/${name}/${fractions}`,
+            path:`/success/${this.name}/${this.fractions}`,
             query:{
               uid:this.uid
             }
@@ -499,7 +489,7 @@ export default {
           this.$notify({
             type: 'danger',
             message: res.errmsg,
-            duration:0
+            duration:8000
           })
         }
       })
@@ -529,8 +519,6 @@ export default {
         confirmButtonText:'提交',
         cancelButtonText:'取消'
       }).then(() => {
-        // on confirm
-        console.log(0);
         this.submit()
       }).catch(() => {
         // on cancel
@@ -547,7 +535,7 @@ export default {
         });
       }
       if (this.minutes === 0 && this.seconds === 0) {
-        this.submit()
+        // this.submit()
       }
       return n < 10 ? '0' + n : '' + n;
     },
@@ -572,26 +560,26 @@ export default {
   },
   watch: {
     // 倒计时
-    second: {
-      handler(newVal) {
-        this.num(newVal);
-      },
-    },
+    // second: {
+    //   handler(newVal) {
+    //     this.num(newVal);
+    //   },
+    // },
     // 倒计时
-    minute: {
-      handler(newVal) {
-        this.num(newVal);
-      },
-    },
+    // minute: {
+    //   handler(newVal) {
+    //     this.num(newVal);
+    //   },
+    // },
   },
   computed: {
     // 倒计时
-    second: function() {
-      return this.num(this.seconds);
-    },
-    minute: function() {
-      return this.num(this.minutes);
-    },
+    // second: function() {
+    //   return this.num(this.seconds);
+    // },
+    // minute: function() {
+    //   return this.num(this.minutes);
+    // },
   },
 }
 
