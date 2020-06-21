@@ -3,8 +3,8 @@
 <div class="question">
   <van-nav-bar
   class="timer"
-  :title="name"
-  left-text=""
+  :title="'倒计时 '+minutes+' : '+second"
+  :left-text="name"
   :right-text="fractions+'分'"
   fixed
   />
@@ -117,6 +117,7 @@
 export default {
   data() {
     return {
+      longTime:null,
       dataList:[],
       fractions:0,
       name:'',
@@ -321,6 +322,11 @@ export default {
           let numbers = res.numbers;//轮数
           let expoId = res.expoId;//活动ID
           let name = res.name;//选手姓名
+          if(res.data && res.data[0].ruleId){
+            this.minutes = res.data[0].ruleId / 60 //倒计时
+            this.longTime = res.data[0].ruleId //总时长（秒)
+          }
+
           this.userId = userId
           this.numbers = numbers
           this.name = name
@@ -469,20 +475,24 @@ export default {
       }
     },
     submit(){
+      let longTime = this.longTime - (this.minutes * 60 + this.seconds)
       let data = {
         id:this.userId,
         turn:this.numbers,
         name:this.name,
         expoId:this.expoId,
-        sumScore:this.fractions
+        sumScore:this.fractions,
+        longTime:longTime
       }
 
       this.$http.insertScore(data).then(res => {
         if(res.errcode === 0){
           this.$router.push({
-            path:`/success/${this.name}/${this.fractions}`,
+            path:`/success/${this.name}/${this.fractions}/${longTime}`,
             query:{
-              uid:this.uid
+              uid:this.uid,
+              expoId:this.expoId,
+              turn:this.numbers,
             }
           })
         }else{
@@ -560,26 +570,26 @@ export default {
   },
   watch: {
     // 倒计时
-    // second: {
-    //   handler(newVal) {
-    //     this.num(newVal);
-    //   },
-    // },
+    second: {
+      handler(newVal) {
+        this.num(newVal);
+      },
+    },
     // 倒计时
-    // minute: {
-    //   handler(newVal) {
-    //     this.num(newVal);
-    //   },
-    // },
+    minute: {
+      handler(newVal) {
+        this.num(newVal);
+      },
+    },
   },
   computed: {
     // 倒计时
-    // second: function() {
-    //   return this.num(this.seconds);
-    // },
-    // minute: function() {
-    //   return this.num(this.minutes);
-    // },
+    second: function() {
+      return this.num(this.seconds);
+    },
+    minute: function() {
+      return this.num(this.minutes);
+    },
   },
 }
 

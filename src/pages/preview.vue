@@ -1,15 +1,16 @@
 <template>
-  <div class="view-wrapper">
+  <div class="view-wrapper" :style="{backgroundImage:'url('+bgUrl+')'}">
     <div class="view">
       <div class="title">竞赛活动排名</div>
-      <div class="mtitle">(当前第 {{this.turn}} 轮)</div>
+      <div class="mtitle">(当前第 {{turn}} 轮)</div>
       <div class="list">
         <table class="table">
           <thead>
             <tr>
               <th class="num">排名</th>
               <th>姓名</th>
-              <th>轮次</th>
+              <th>用时</th>
+              <!-- <th>轮次</th> -->
               <!-- <th>最高分</th>
               <th>最低分</th>
               <th>平均分</th> -->
@@ -22,7 +23,8 @@
                 <span class="number">{{index+1}}</span>
               </td>
               <td>{{item.urlsname}}</td>
-              <td>{{item.rurns}}</td>
+              <td>{{item.longTime}}</td>
+              <!-- <td>{{item.rurns}}</td> -->
               <!-- <td>{{item.maxScore}}</td>
               <td>{{item.minScore}}</td>
               <td>{{item.averageScore}}</td> -->
@@ -50,7 +52,8 @@ export default {
       data:[],
       turn:1,
       type:0,
-      time:null
+      time:null,
+      bgUrl:'',
     }
   },
   created(){
@@ -76,12 +79,13 @@ export default {
         if(res.errcode === 0){
           this.data = res.data
           this.turn = res.numbers
+          this.bgUrl = res.abcPic
         }
       })
     },
     setList(flog){
       let data
-      if(flog === 1 && this.$route.query.turn === 1) return
+      if(flog === 1 && parseInt(this.$route.query.turn) === 1) return
       if(flog === 1) {
         data = {
           expoId:this.expoid,
@@ -120,6 +124,8 @@ export default {
               start:'s'
             }
           })
+          this.$toast.success('操作成功');
+          this.turn = data.turn
         }else {
           this.$notify({
             type: 'danger',
@@ -154,6 +160,8 @@ export default {
   bottom: 0;
   right: 0;
   background: #3399CC;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 .title{
   font-size: 36px;

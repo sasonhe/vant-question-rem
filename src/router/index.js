@@ -4,7 +4,10 @@ import Index from '@/pages/index'
 import Question from "@/layout/question"
 import View from "@/layout/view"
 Vue.use(Router)
-
+const routerPush = Router.prototype.push
+Router.prototype.push = function push(location) {
+  return routerPush.call(this, location).catch(error=> error)
+}
 export default new Router({
   routes: [
     {
@@ -30,7 +33,7 @@ export default new Router({
       ]
     },
     {
-      path: '/success/:name/:fractions',
+      path: '/success/:name/:fractions/:time',
       redirect:'/success',
       component: Question,
       children:[

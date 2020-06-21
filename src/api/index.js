@@ -11,12 +11,13 @@ const insertScore = data => http.post('/api/swer/insertScore.do',data) //提交
 const getList = data => http.get('/api/swer/getList.do',{params:data}) //大屏显示
 const setList = data => http.get('/api/swer/setList.do',{params:data}) //设置
 
-
+const findNext = data => http.get('/api/swer/findNext.do',{params:data}) //下一轮
 
 export default {
   getQuestionList,
   findSwer,
   insertScore,
   getList,
-  setList
+  setList,
+  findNext
 }
