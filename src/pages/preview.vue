@@ -9,12 +9,13 @@
             <tr>
               <th class="num">排名</th>
               <th>姓名</th>
-              <th>用时</th>
+
               <!-- <th>轮次</th> -->
               <!-- <th>最高分</th>
               <th>最低分</th>
               <th>平均分</th> -->
               <th>总分数</th>
+              <th>用时</th>
             </tr>
           </thead>
           <tbody>
@@ -23,12 +24,13 @@
                 <span class="number">{{index+1}}</span>
               </td>
               <td>{{item.urlsname}}</td>
-              <td>{{item.longTime}}</td>
+
               <!-- <td>{{item.rurns}}</td> -->
               <!-- <td>{{item.maxScore}}</td>
               <td>{{item.minScore}}</td>
               <td>{{item.averageScore}}</td> -->
               <td>{{item.sumScore}}</td>
+              <td>{{item.longTime?item.longTime+' 秒':''}}</td>
             </tr>
           </tbody>
         </table>
