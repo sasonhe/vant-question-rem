@@ -545,7 +545,7 @@ export default {
         });
       }
       if (this.minutes === 0 && this.seconds === 0) {
-        // this.submit()
+        this.submit()
       }
       return n < 10 ? '0' + n : '' + n;
     },
