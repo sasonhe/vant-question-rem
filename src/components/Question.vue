@@ -117,6 +117,7 @@
 export default {
   data() {
     return {
+      time:null,
       longTime:null,
       dataList:[],
       fractions:0,
@@ -134,7 +135,7 @@ export default {
       radio:1,
       result:[],
       current: 0,
-      minutes: 1, //分
+      minutes: '', //分
       seconds: 0, //秒
       caseType:["A","B","C","D","E","F"],
       data:[
@@ -323,7 +324,16 @@ export default {
           let expoId = res.expoId;//活动ID
           let name = res.name;//选手姓名
           if(res.data && res.data[0].ruleId){
-            this.minutes = res.data[0].ruleId / 60 //倒计时
+            let s = res.data[0].ruleId
+            //计算分钟
+            //算法：将秒数除以60，然后下舍入，既得到分钟数
+            let h;
+            h  =   Math.floor(s/60);
+            //计算秒
+            //算法：取得秒%60的余数，既得到秒数
+            s  =   s%60;
+            this.minutes = h //倒计时
+            this.seconds = s
             this.longTime = res.data[0].ruleId //总时长（秒)
           }
 
@@ -362,6 +372,7 @@ export default {
             }
           })
           this.dataList = data
+          window.clearInterval(this.time);
           // 倒计时
           this.timer();
           this.$toast({
@@ -536,29 +547,19 @@ export default {
     },
     // 倒计时
     num(n) {
-      // 倒计时结束重新刷新页面
-      if (this.minutes === 0 && this.seconds === 2) {
-        this.$toast({
-          message:'时间到，即将提交结束答题',
-          duration:3000,
-          position:'top',
-        });
-      }
-      if (this.minutes === 0 && this.seconds === 0) {
-        // this.submit()
-      }
+      // 倒计时
       return n < 10 ? '0' + n : '' + n;
     },
     // 倒计时
     timer() {
       var _this = this;
-      var time = window.setInterval(function() {
+      _this.time = window.setInterval(function() {
         if (_this.seconds === 0 && _this.minutes !== 0) {
           _this.seconds = 59;
           _this.minutes -= 1;
         } else if (_this.minutes === 0 && _this.seconds === 0) {
           _this.seconds = 0;
-          window.clearInterval(time);
+          window.clearInterval(_this.time);
         } else {
           _this.seconds -= 1;
         }
@@ -572,6 +573,16 @@ export default {
     // 倒计时
     second: {
       handler(newVal) {
+        if (this.minutes === 0 && this.seconds === 2) {
+          this.$toast({
+            message:'时间到，即将提交结束答题',
+            duration:3000,
+            position:'top',
+          });
+        }
+        if (this.minutes === 0 && this.seconds === 0) {
+          this.submit()
+        }
         this.num(newVal);
       },
     },
