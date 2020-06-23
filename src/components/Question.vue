@@ -449,7 +449,6 @@ export default {
     },
 
     onChangeRadio(e,item){
-
       item.disable = true;
       if(e == item.checked){
         this.right+=1;
@@ -487,15 +486,28 @@ export default {
     },
     submit(){
       let longTime = this.longTime - (this.minutes * 60 + this.seconds)
+      let str = ''
+      this.dataList.forEach((item, index) => {
+        let num = index + 1
+        str += `${num}.${item.anName} `
+        if(item.anType === 1){
+          str += `${item.result}  `
+        }
+        if(item.anType === 2){
+          item.result.forEach((el, i) => {
+            str += `${el}  `
+          })
+        }
+      })
       let data = {
         id:this.userId,
         turn:this.numbers,
         name:this.name,
         expoId:this.expoId,
         sumScore:this.fractions,
-        longTime:longTime
+        longTime:longTime,
+        ruleId:str
       }
-
       this.$http.insertScore(data).then(res => {
         if(res.errcode === 0){
           this.$router.push({
@@ -575,7 +587,7 @@ export default {
       handler(newVal) {
         if (this.minutes === 0 && this.seconds === 2) {
           this.$toast({
-            message:'时间到，即将提交结束答题',
+            message:'时间到，提交结束答题',
             duration:3000,
             position:'top',
           });
