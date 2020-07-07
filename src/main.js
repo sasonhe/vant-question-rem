@@ -9,7 +9,7 @@ import promise from 'es6-promise'
 import '@vant/touch-emulator'
 import api from '@/api/'
 promise.polyfill()
-import { NavBar,Dialog,Row, Col, Icon,Tabbar, TabbarItem,Button,Tag,RadioGroup, Radio,Swipe, SwipeItem,Checkbox, CheckboxGroup,Cell, CellGroup,Toast,Notify   } from 'vant'
+import { NavBar,Dialog,Row, Col, Icon,Tabbar, TabbarItem,Button,Tag,RadioGroup, Radio,Swipe, SwipeItem,Checkbox, CheckboxGroup,Cell, CellGroup,Toast,Notify, Overlay   } from 'vant'
 Vue.use(NavBar);
 Vue.use(Dialog);
 Vue.use(Row);
@@ -30,6 +30,7 @@ Vue.use(Cell);
 Vue.use(CellGroup);
 Vue.use(Toast);
 Vue.use(Notify);
+Vue.use(Overlay);
 Vue.prototype.$dialog = Dialog
 Vue.prototype.$toast = Toast
 Vue.prototype.$notify = Notify

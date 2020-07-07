@@ -117,6 +117,7 @@
 export default {
   data() {
     return {
+      awaitTimer:null,
       time:null,
       longTime:null,
       dataList:[],
@@ -374,11 +375,10 @@ export default {
           this.dataList = data
           window.clearInterval(this.time);
           // 倒计时
-          this.timer();
-          this.$toast({
-            message:'请开始答题',
-            duration:3000,
-            position:'top',
+          this.$dialog.alert({
+            message: '题目已加载，请点击确认开始答题',
+          }).then(() => {
+            this.timer();
           });
         }else{
           this.$notify({
@@ -386,8 +386,35 @@ export default {
             message: res.errmsg,
             duration:8000,
           })
+          this.awaitFn();
         }
       })
+    },
+    awaitFn(){
+      this.wait = this.$toast.loading({
+        message: '未开始，等待中...',
+        forbidClick: true,
+        loadingType: 'spinner',
+        duration:0,
+        className:'custom',
+        overlay:true
+      });
+      return
+      window.clearInterval(this.awaitTimer)
+      this.awaitTimer = setInterval(()=>{
+        let data = {
+          expoId:this.expoId,
+          uid:this.uid,
+          username:this.username
+        }
+        this.$http.findSwer(data).then(res =>  {
+          if(res.errcode === 0) {
+            window.clearInterval(this.awaitTimer);
+            this.wait.clear();
+            this.getInfo(data)
+          }
+        })
+      },5000)
     },
     clickResult(data){
       if(this.current === this.dataList.length -1){

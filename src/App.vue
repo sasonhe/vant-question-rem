@@ -25,5 +25,7 @@ export default {
 </script>
 
 <style>
-
+.custom {
+  width: 220px;
+}
 </style>
