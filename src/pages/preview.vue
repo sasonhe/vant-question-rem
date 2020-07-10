@@ -140,7 +140,7 @@ export default {
     timer() {
       this.time = window.setInterval(()=> {
         this.getList()
-      }, 3000);
+      }, 5000);
     },
   }
 }

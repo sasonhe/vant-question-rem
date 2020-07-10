@@ -61,7 +61,12 @@ export default {
       })
     },
     getInfo(data){
+      let ts = this.$toast.loading({
+        message: '加载中...',
+        forbidClick: true,
+      });
       this.$http.getQuestionList(data).then(res => {
+        ts.clear();
         if(res.errcode === 0){
           this.nameList = res.data;
         }else{
@@ -71,6 +76,8 @@ export default {
             duration:0
           })
         }
+      }).catch(()=>{
+        ts.clear();
       })
     }
   }

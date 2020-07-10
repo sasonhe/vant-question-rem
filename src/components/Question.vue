@@ -317,7 +317,7 @@ export default {
   },
   methods: {
     getInfo(data){
-      this.$http.findSwer(data).then(res => {
+      return this.$http.findSwer(data).then(res => {
         if(res.errcode === 0){
           let data = res.data;
           let userId = res.userId;//选手ID
@@ -375,11 +375,13 @@ export default {
           this.dataList = data
           window.clearInterval(this.time);
           // 倒计时
-          this.$dialog.alert({
-            message: '题目已加载，请点击确认开始答题',
-          }).then(() => {
-            this.timer();
-          });
+          setTimeout(()=>{
+            this.$dialog.alert({
+              message: '题目已加载，请点击确认开始答题',
+            }).then(() => {
+              this.timer();
+            },2000);
+          })
         }else{
           this.$notify({
             type: 'danger',
@@ -388,16 +390,41 @@ export default {
           })
           this.awaitFn();
         }
+        return res
       })
     },
     awaitFn(){
-      this.wait = this.$toast.loading({
-        message: '未开始，等待中...',
-        forbidClick: true,
-        loadingType: 'spinner',
-        duration:0,
-        className:'custom',
-        overlay:true
+      this.$dialog.confirm({
+        title: '提示',
+        message: '活动暂未启动，可点击刷新查看是否开启',
+        // overlay:false,
+        overlayStyle:{
+          // background: 'rgba(0, 0, 0, 0.32)',
+          zIndex:1990
+        },
+        showCancelButton:false,
+        confirmButtonText:'刷新',
+        beforeClose:(action, done) =>{
+        if (action === 'confirm') {
+          let data = {
+            expoId:this.expoId,
+            uid:this.uid,
+            username:this.username
+          }
+          this.getInfo(data).then(res => {
+            if(res.errcode === 0){
+              done()
+            }else{
+              done(false)
+            }
+          }).catch(()=>{
+            done(false)
+          })
+          // setTimeout(done, 1000);
+        } else {
+          done();
+        }
+      },
       });
       return
       window.clearInterval(this.awaitTimer)
