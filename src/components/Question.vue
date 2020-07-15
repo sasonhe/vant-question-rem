@@ -15,36 +15,18 @@
           <van-tag mark type="primary">{{item.anType===1?"单选题":"多选题"}}</van-tag>
         </div>
         <div class="topic-title van-hairline--bottom">
-          <!-- <span class="numIndex">{{index+1}}</span> -->
+          <span class="numIndex">{{index+1}}.</span>
           {{item.anName}}
         </div>
         <div class="topic-action">
-
-          <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.anType===1" @change="onChangeRadio($event,item)">
-            <van-radio class="checked-list" v-for="(items,index) in item.childList" :name="items.flag" icon-size="0.68rem" :key="items.id">
-
-              <img
-                v-if="items.checked == 1"
-                class="custom-icon"
-                slot="icon"
-                slot-scope="props"
-                :src="activeIcon"
-              >
-              <img
-                v-else-if="items.checked == 2"
-                class="custom-icon"
-                slot="icon"
-                slot-scope="props"
-                :src="erractiveIcon"
-              >
-              <img
-                v-else
-                class="custom-icon"
-                slot="icon"
-                slot-scope="props"
-                :src="inactiveIcon"
-              >
+          <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.anType===1">{{item.result}}
+            <van-radio class="checked-list" :disabled="item.disable" v-for="(items,index) in item.childList" :name="items.flag" icon-size="0.68rem" :key="items.id" @click="checkedRadio($event,item,items,items.flag)">
               {{items.flag}}
+              <template #icon="props">
+                <img class="custom-icon" v-if="items.checked == 1" :src="activeIcon" />
+                <img class="custom-icon" v-else-if="items.checked == 2" :src="erractiveIcon" />
+                <img class="custom-icon" v-else :src="inactiveIcon" />
+              </template>
             </van-radio>
           </van-radio-group>
 
@@ -78,7 +60,10 @@
           </van-checkbox-group>
 
           <div style="padding:20px;" v-if="item.anType===2">
-            <van-button type="info" round size="normal" :disabled="item.result.length>=2?false:true" block v-on:click="clickResult(item)">确定</van-button>
+            <van-button type="info" round size="normal" :disabled="item.result.length>=2?false:true" block v-on:click="clickResult(item,2)">确定</van-button>
+          </div>
+          <div style="padding:20px;" v-if="item.anType===1">
+            <van-button type="info" round size="normal" :disabled="item.result.length === 0 || item.disable" block v-on:click="clickResult(item,1)">确定</van-button>
           </div>
         </div>
       </van-swipe-item>
@@ -316,6 +301,113 @@ export default {
     }
   },
   methods: {
+    checkedRadio(e,item,items,flag){
+      if(item.disable) return
+      item.childList.forEach(el=>{
+        el.checked = 0
+      })
+      items.checked = 1
+    },
+    // 单选处理
+    radioClick(data){
+      console.log(data);
+      data.disable = true;
+      data.childList.forEach(el=>{
+
+        // 给选对的计分
+        if(el.checked === 1 && el.flag === data.checked) {
+          this.right+=1;
+          this.fractions += parseInt(data.fractions)
+        }
+        // 给选错的项打 X
+        if(el.checked === 1 && el.flag !== data.checked) {
+          this.error+=1;
+          el.checked = 2;
+        }
+        // 给正确的那一项打勾
+        if(el.flag === data.checked) {
+          el.checked = 1;
+        }
+
+      })
+      setTimeout(_=>{
+        this.$refs.next.next();
+      },500)
+      if(this.current === this.dataList.length -1){
+        setTimeout(_=>{
+          this.$dialog.confirm({
+            title: '温馨提示',
+            message: '当前已是最后一题，答完请交卷',
+            confirmButtonText:'交卷',
+            cancelButtonText:'继续答题',
+
+          }).then(() => {
+            // on confirm
+            this.submit()
+          }).catch(() => {
+            // on cancel
+          });
+        },1000)
+      }
+    },
+    // 多选处理
+    checkboxClick(data){
+      if(this.current === this.dataList.length -1){
+        setTimeout(_=>{
+          this.$dialog.confirm({
+            title: '温馨提示',
+            message: '当前已是最后一题，答完请交卷',
+            confirmButtonText:'交卷',
+            cancelButtonText:'继续答题'
+          }).then(() => {
+            // on confirm
+            this.submit()
+          }).catch(() => {
+            // on cancel
+          });
+        },1000)
+      }
+      if (data.disable) {
+        return
+      }
+      setTimeout(_=>{
+        this.$refs.next.next();
+      },500)
+      data.disable = true;
+      let {result,checked,childList,fractions} = data;
+      checked.filter((v,i,arr)=>{
+        childList.forEach(el=>{
+          if (el.flag === v) {
+            el.checked = 1;
+          }
+        })
+      })
+      let newArr = result.concat(checked);
+      checked.filter((v,i,arr)=>{
+        newArr.filter((el,index,ags)=>{
+          if (v === el) {
+            newArr.splice(index,1,'item')
+          }
+        })
+      })
+      newArr.forEach(el=>{
+        childList.forEach(item=>{
+          if (el === item.flag) {
+            item.checked = 2;
+          }
+        })
+      })
+      let i = 0
+      while (childList[i]){
+        if (childList[i].checked==2) {
+          this.error+=1;
+          return
+        }
+        i++
+      }
+      this.fractions += parseInt(fractions)
+      this.right+=1;
+    },
     getInfo(data){
       return this.$http.findSwer(data).then(res => {
         if(res.errcode === 0){
@@ -379,7 +471,7 @@ export default {
             this.$dialog.alert({
               message: '题目已加载，请点击确认开始答题',
             }).then(() => {
-              this.timer();
+              // this.timer();
             },2000);
           })
         }else{
@@ -443,66 +535,21 @@ export default {
         })
       },5000)
     },
-    clickResult(data){
-      if(this.current === this.dataList.length -1){
-        setTimeout(_=>{
-          this.$dialog.confirm({
-            title: '温馨提示',
-            message: '当前已是最后一题，答完请交卷',
-            confirmButtonText:'交卷',
-            cancelButtonText:'继续答题'
-          }).then(() => {
-            // on confirm
-            this.submit()
-          }).catch(() => {
-            // on cancel
-          });
-        },1000)
+    clickResult(data,type){
+      if(type === 1) {
+        //radio
+        this.radioClick(data)
       }
-      if (data.disable) {
-        return
+      if(type === 2) {
+        //checkbox
+        this.checkboxClick(data)
       }
-      setTimeout(_=>{
-        this.$refs.next.next();
-      },500)
-      data.disable = true;
-      let {result,checked,childList,fractions} = data;
-      checked.filter((v,i,arr)=>{
-        childList.forEach(el=>{
-          if (el.flag === v) {
-            el.checked = 1;
-          }
-        })
-      })
-      let newArr = result.concat(checked);
-      checked.filter((v,i,arr)=>{
-        newArr.filter((el,index,ags)=>{
-          if (v === el) {
-            newArr.splice(index,1,'item')
-          }
-        })
-      })
-      newArr.forEach(el=>{
-        childList.forEach(item=>{
-          if (el === item.flag) {
-            item.checked = 2;
-          }
-        })
-      })
-      let i = 0
-      while (childList[i]){
-        if (childList[i].checked==2) {
-          this.error+=1;
-          return
-        }
-        i++
-      }
-      this.fractions += parseInt(fractions)
-      this.right+=1;
-
     },
 
     onChangeRadio(e,item){
+      console.log(e);
+      console.log(item);
+      /*
       item.disable = true;
       if(e == item.checked){
         this.right+=1;
@@ -537,6 +584,7 @@ export default {
           });
         },1000)
       }
+      */
     },
     submit(){
       let longTime = this.longTime - (this.minutes * 60 + this.seconds)
