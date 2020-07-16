@@ -19,7 +19,7 @@
           {{item.anName}}
         </div>
         <div class="topic-action">
-          <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.anType===1">{{item.result}}
+          <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.anType===1">
             <van-radio class="checked-list" :disabled="item.disable" v-for="(items,index) in item.childList" :name="items.flag" icon-size="0.68rem" :key="items.id" @click="checkedRadio($event,item,items,items.flag)">
               {{items.flag}}
               <template #icon="props">
@@ -471,7 +471,7 @@ export default {
             this.$dialog.alert({
               message: '题目已加载，请点击确认开始答题',
             }).then(() => {
-              // this.timer();
+              this.timer();
             },2000);
           })
         }else{
