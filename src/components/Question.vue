@@ -591,7 +591,7 @@ export default {
       let str = ''
       this.dataList.forEach((item, index) => {
         let num = index + 1
-        str += `${num}.${item.anName} `
+        str += `${num}. `
         if(item.anType === 1){
           str += `${item.result}  `
         }
