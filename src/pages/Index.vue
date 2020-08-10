@@ -8,12 +8,12 @@
   <div class="body">
     <div class="tips">
       <div>温馨提示：</div>
-      <div>选择对应名称后开始答题</div>
+      <div>选择本人姓名后开始答题</div>
       <div>答题后不能修改答案，答完一题自动进入下一题</div>
     </div>
     <div class="nameList">
-      <van-row gutter="20">
-        <van-col span="8" class="span" v-for="item in nameList" :key="item.id">
+      <van-row gutter="10">
+        <van-col span="6" class="span" v-for="item in nameList" :key="item.id">
           <div class="btn" @click="clickName(item)">
             {{item.username}}
           </div>
@@ -109,9 +109,9 @@ export default {
 }
 .btn{
   padding: 10px 2px;
-  width: 100px;
+  /* width: 82px; */
   background: #759b67;
-  font-size: 16px;
+  font-size: 14px;
   color: #fff;
   margin: 0 auto;
   cursor: pointer;
@@ -119,13 +119,13 @@ export default {
 .tips{
   font-size: 14px;
   color: #9e9e9e;
-  padding: 20px 15px 5px 15px;
+  padding: 20px 10px 5px 10px;
 }
 .tips div{
   line-height: 20px;
 }
 .nameList{
-  padding: 20px 15px
+  padding: 20px 10px
 }
 .span{
   text-align: center;
