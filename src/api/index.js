@@ -13,11 +13,15 @@ const setList = data => http.get('/api/swer/setList.do',{params:data}) //设置
 
 const findNext = data => http.get('/api/swer/findNext.do',{params:data}) //下一轮
 
+const u = './static/findSwer.json'
+const findLocal = data => http.get(u,{params:data}) //下一轮
+
 export default {
   getQuestionList,
   findSwer,
   insertScore,
   getList,
   setList,
-  findNext
+  findNext,
+  findLocal
 }

@@ -1,9 +1,8 @@
 <template>
-  <!-- :title="'倒计时 '+minutes+' : '+second" -->
 <div class="question">
   <van-nav-bar
   class="timer"
-  :title="'倒计时 '+minutes+' : '+second"
+  :title="`题/秒 倒计时 ${timeNum}`"
   :left-text="name"
   :right-text="fractions+'分'"
   fixed
@@ -19,8 +18,8 @@
           {{item.anName}}
         </div>
         <div class="topic-action">
-          <van-radio-group :disabled="item.disable" v-model="item.result" v-if="item.anType===1">
-            <van-radio class="checked-list" :disabled="item.disable" v-for="(items,index) in item.childList" :name="items.flag" icon-size="0.68rem" :key="items.id" @click="checkedRadio($event,item,items,items.flag)">
+          <van-radio-group :disabled="item.disable || item.ruleId ===0" v-model="item.result" v-if="item.anType===1">
+            <van-radio class="checked-list" :disabled="item.disable || item.ruleId ===0" v-for="(items,index) in item.childList" :name="items.flag" icon-size="0.68rem" :key="items.id" @click="checkedRadio($event,item,items,items.flag)">
               {{items.flag}}
               <template #icon="props">
                 <img class="custom-icon" v-if="items.checked == 1" :src="activeIcon" />
@@ -30,7 +29,7 @@
             </van-radio>
           </van-radio-group>
 
-          <van-checkbox-group :disabled="item.disable" v-model="item.result" v-else>
+          <van-checkbox-group :disabled="item.disable || item.ruleId ===0" v-model="item.result" v-else>
             <van-checkbox class="checked-list" v-for="(items,index) in item.childList" :name="items.flag" icon-size="0.68rem" :key="items.id">
               <img
                 v-if="items.checked == 1"
@@ -60,15 +59,18 @@
           </van-checkbox-group>
 
           <div style="padding:20px;" v-if="item.anType===2">
-            <van-button type="info" round size="normal" :disabled="item.result.length>=2?false:true" block v-on:click="clickResult(item,2)">确定</van-button>
+            <van-button type="info" round size="normal" :disabled="item.result.length>=2?false:true || item.ruleId ===0" block v-on:click="clickResult(item,2)">确定</van-button>
           </div>
           <div style="padding:20px;" v-if="item.anType===1">
-            <van-button type="info" round size="normal" :disabled="item.result.length === 0 || item.disable" block v-on:click="clickResult(item,1)">确定</van-button>
+            <van-button type="info" round size="normal" :disabled="item.result.length === 0 || item.disable || item.ruleId ===0" block v-on:click="clickResult(item,1)">确定</van-button>
+          </div>
+          <div style="padding:20px;text-align:center;">
+            总用时：{{secondTime}}
           </div>
         </div>
       </van-swipe-item>
-
       <div class="custom-indicator" slot="indicator"></div>
+
     </van-swipe>
 
 
@@ -102,6 +104,8 @@
 export default {
   data() {
     return {
+      secondTime:0,
+
       awaitTimer:null,
       time:null,
       longTime:null,
@@ -123,165 +127,7 @@ export default {
       current: 0,
       minutes: '', //分
       seconds: 0, //秒
-      caseType:["A","B","C","D","E","F"],
-      data:[
-        {
-          id:2,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。C、D',
-          type:1,
-          result:[],
-          checked:["多选题3","多选题4"],
-          disable:false,
-          answer:[
-            {
-              name:'多选题1',
-              checked:0
-            },
-            {
-              name:'多选题2',
-              checked:0
-            },
-            {
-              name:'多选题3',
-              checked:0
-            },
-            {
-              name:'多选题4',
-              checked:0
-            }
-          ]
-        },
-        {
-          id:0,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。A',
-          type:0,
-          result:[],
-          checked:'单选题 1',
-          disable:false,
-          answer:[
-            {
-              name:'单选题 1',
-              checked:0
-            },
-            {
-              name:'单选题 2',
-              checked:0
-            },
-            {
-              name:'单选题 3',
-              checked:0
-            },
-            {
-              name:'单选题 4',
-              checked:0
-            }
-          ]
-        },
-        {
-          id:1,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。B',
-          type:0,
-          result:[],
-          checked:'单选题 2',
-          disable:false,
-          answer:[
-            {
-              name:'单选题 1',
-              checked:0
-            },
-            {
-              name:'单选题 2',
-              checked:0
-            },
-            {
-              name:'单选题 3',
-              checked:0
-            },
-            {
-              name:'单选题 4',
-              checked:0
-            }
-          ]
-        },
-        {
-          id:6,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。C',
-          type:0,
-          result:[],
-          checked:'单选题 6',
-          disable:false,
-          answer:[
-            {
-              name:'单选题 1',
-              checked:0
-            },
-            {
-              name:'单选题 2',
-              checked:0
-            },
-            {
-              name:'单选题 6',
-              checked:0
-            },
-            {
-              name:'单选题 4',
-              checked:0
-            }
-          ]
-        },
-        {
-          id:3,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。D',
-          type:0,
-          result:[],
-          checked:'单选题 4',
-          disable:false,
-          answer:[
-            {
-              name:'单选题 1',
-              checked:0
-            },
-            {
-              name:'单选题 2',
-              checked:0
-            },
-            {
-              name:'单选题 3',
-              checked:0
-            },
-            {
-              name:'单选题 4',
-              checked:0
-            }
-          ]
-        },
-        {
-          id:4,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。A、B、C',
-          type:1,
-          result:[],
-          checked:["多选题1","多选题3","多选题2"],
-          disable:false,
-          answer:[
-            {
-              name:'多选题1',
-              checked:0
-            },
-            {
-              name:'多选题2',
-              checked:0
-            },
-            {
-              name:'多选题3',
-              checked:0
-            },
-            {
-              name:'多选题4',
-              checked:0
-            }
-          ]
-        }
-      ]
+      caseType:["A","B","C","D","E","F"]
     }
   },
   created(){
@@ -310,7 +156,6 @@ export default {
     },
     // 单选处理
     radioClick(data){
-      console.log(data);
       data.disable = true;
       data.childList.forEach(el=>{
 
@@ -409,26 +254,19 @@ export default {
       this.right+=1;
     },
     getInfo(data){
-      return this.$http.findSwer(data).then(res => {
+      // findSwer
+      return this.$http.findLocal(data).then(res => {
+
         if(res.errcode === 0){
           let data = res.data;
           let userId = res.userId;//选手ID
           let numbers = res.numbers;//轮数
           let expoId = res.expoId;//活动ID
           let name = res.name;//选手姓名
-          if(res.data && res.data[0].ruleId){
-            let s = res.data[0].ruleId
-            //计算分钟
-            //算法：将秒数除以60，然后下舍入，既得到分钟数
-            let h;
-            h  =   Math.floor(s/60);
-            //计算秒
-            //算法：取得秒%60的余数，既得到秒数
-            s  =   s%60;
-            this.minutes = h //倒计时
-            this.seconds = s
-            this.longTime = res.data[0].ruleId //总时长（秒)
-          }
+          // if(res.data && res.data[0].ruleId){
+          //   let s = res.data[0].ruleId
+          //   this.secondTime = s
+          // }
 
           this.userId = userId
           this.numbers = numbers
@@ -465,15 +303,20 @@ export default {
             }
           })
           this.dataList = data
-          window.clearInterval(this.time);
+          if(this.stimer){
+            window.clearInterval(this.stimer);
+          }
+          this.startTime()
+
+          // window.clearInterval(this.time);
           // 倒计时
-          setTimeout(()=>{
-            this.$dialog.alert({
-              message: '题目已加载，请点击确认开始答题',
-            }).then(() => {
-              this.timer();
-            },2000);
-          })
+          // setTimeout(()=>{
+          //   this.$dialog.alert({
+          //     message: '题目已加载，请点击确认开始答题',
+          //   }).then(() => {
+          //     this.timer();
+          //   },2000);
+          // })
         }else{
           this.$notify({
             type: 'danger',
@@ -484,6 +327,23 @@ export default {
         }
         return res
       })
+    },
+    startTime(){
+      this.stimer = window.setInterval(()=>{
+        if(this.dataList[this.current].ruleId){
+          this.dataList[this.current].ruleId --;
+          this.secondTime+=1
+        }
+        if(this.dataList[this.current].ruleId === 0){
+          this.dataList[this.current].disable = true
+          window.clearInterval(this.stimer);
+          // this.$refs.next.next();
+        }
+        if(this.dataList.length === this.current){
+
+          window.clearInterval(this.stimer);
+        }
+      },1000)
     },
     awaitFn(){
       this.$dialog.confirm({
@@ -631,7 +491,17 @@ export default {
 
     },
     onChange(index) {
+      if(this.stimer && this.dataList[this.current].ruleId === 0){
+        window.clearInterval(this.stimer);
+      }
+
+      this.dataList[this.current].ruleId = this.timeNum
       this.current = index;
+      if(this.dataList[this.current].ruleId !== 0){
+        window.clearInterval(this.stimer);
+        this.startTime()
+      }
+
     },
     onClickLeft(){
       this.$dialog.confirm({
@@ -680,9 +550,6 @@ export default {
       }, 1000);
     },
   },
-  mounted() {
-
-  },
   watch: {
     // 倒计时
     second: {
@@ -714,6 +581,16 @@ export default {
     },
     minute: function() {
       return this.num(this.minutes);
+    },
+    minute: function() {
+      return this.num(this.minutes);
+    },
+    timeNum(){
+      if(this.dataList.length > 0){
+        return this.dataList[this.current].ruleId
+      }else{
+        return 0
+      }
     },
   },
 }
