@@ -19,7 +19,7 @@
     "expoId": 94,
     "createTime": null,
     "flag": null,
-    "ruleId": 15,
+    "ruleId": 8,
     "status": 1,
     "childList": [{
       "id": 4598,
@@ -95,7 +95,7 @@
     "expoId": 94,
     "createTime": null,
     "flag": null,
-    "ruleId": 80,
+    "ruleId": 10,
     "status": 1,
     "childList": [{
       "id": 4603,
@@ -171,7 +171,7 @@
     "expoId": 94,
     "createTime": null,
     "flag": null,
-    "ruleId": 120,
+    "ruleId": 12,
     "status": 1,
     "childList": [{
       "id": 4608,

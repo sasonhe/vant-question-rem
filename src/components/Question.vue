@@ -17,7 +17,7 @@
           <span class="numIndex">{{index+1}}.</span>
           {{item.anName}}
         </div>
-        <div class="topic-action">
+        <div class="topic-action" style="position:relative;">
           <van-radio-group :disabled="item.disable || item.ruleId ===0" v-model="item.result" v-if="item.anType===1">
             <van-radio class="checked-list" :disabled="item.disable || item.ruleId ===0" v-for="(items,index) in item.childList" :name="items.flag" icon-size="0.68rem" :key="items.id" @click="checkedRadio($event,item,items,items.flag)">
               {{items.flag}}
@@ -58,15 +58,30 @@
             </van-checkbox>
           </van-checkbox-group>
 
+          <div class="ok-box" v-if="item.disable">
+            <div class="one-box">
+              <div class="box-item-width">当前选择：</div>
+              <div class="box-item">{{item.result}}</div>
+            </div>
+            <div class="one-box box-success">
+              <div class="box-item-width">正确答案：</div>
+              <div class="box-item">{{item.checked}}</div>
+            </div>
+          </div>
+
           <div style="padding:20px;" v-if="item.anType===2">
             <van-button type="info" round size="normal" :disabled="item.result.length>=2?false:true || item.ruleId ===0" block v-on:click="clickResult(item,2)">确定</van-button>
           </div>
           <div style="padding:20px;" v-if="item.anType===1">
             <van-button type="info" round size="normal" :disabled="item.result.length === 0 || item.disable || item.ruleId ===0" block v-on:click="clickResult(item,1)">确定</van-button>
           </div>
-          <div style="padding:20px;text-align:center;">
-            总用时：{{secondTime}}
+
+          <div class="status-img" v-if="item.disable">
+            <img class="status-item" v-if="item.select == 1" :src="okImg" />
+            <img class="status-item" v-else-if="item.select == 2" :src="errorImg" />
+            <img class="status-item" v-else :src="timeoutImg" />
           </div>
+
         </div>
       </van-swipe-item>
       <div class="custom-indicator" slot="indicator"></div>
@@ -105,7 +120,7 @@ export default {
   data() {
     return {
       secondTime:0,
-
+      actived:null,
       awaitTimer:null,
       time:null,
       longTime:null,
@@ -121,6 +136,9 @@ export default {
       activeIcon: require('@/assets/icon/radiobutton.png'),
       inactiveIcon: require('@/assets/icon/radiooff.png'),
       erractiveIcon: require('@/assets/icon/cuowu-tianchong.png'),
+      okImg: require('@/assets/statusimg/ok.png'),
+      errorImg: require('@/assets/statusimg/error.png'),
+      timeoutImg: require('@/assets/statusimg/timeout.png'),
       active:'null',
       radio:1,
       result:[],
@@ -129,6 +147,11 @@ export default {
       seconds: 0, //秒
       caseType:["A","B","C","D","E","F"]
     }
+  },
+  mounted(){
+    Array.prototype.diff = function(a) {
+      return this.filter(function(i) {return a.indexOf(i) < 0;});
+    };
   },
   created(){
     let expoId = this.$route.query.expoId;
@@ -147,6 +170,18 @@ export default {
     }
   },
   methods: {
+    // 数组差值
+    subSet(arr1, arr2) {
+      var len = arr1.length;
+      var arr = [];
+
+      while (len--) {
+        if (arr2.indexOf(arr1[len]) < 0) {
+            arr.push(arr1[len]);
+        }
+      }
+      return arr;
+    },
     checkedRadio(e,item,items,flag){
       if(item.disable) return
       item.childList.forEach(el=>{
@@ -163,11 +198,13 @@ export default {
         if(el.checked === 1 && el.flag === data.checked) {
           this.right+=1;
           this.fractions += parseInt(data.fractions)
+          data.select = 1
         }
         // 给选错的项打 X
         if(el.checked === 1 && el.flag !== data.checked) {
           this.error+=1;
           el.checked = 2;
+          data.select = 2
         }
         // 给正确的那一项打勾
         if(el.flag === data.checked) {
@@ -220,38 +257,42 @@ export default {
       },500)
       data.disable = true;
       let {result,checked,childList,fractions} = data;
-      checked.filter((v,i,arr)=>{
-        childList.forEach(el=>{
+      let sLen = 0 //记录选对的个数
+      let len = checked.length;//正确答案个数
+      let errorAry = this.subSet(result,checked) //获取差值
+      checked.forEach((e,i) => {
+        result.forEach((s,n) => {
+          if(e === s){
+            sLen += 1
+          }
+        })
+      })
+
+      //对的加分记录
+      if(len === sLen) {
+        this.fractions += parseInt(fractions)
+        this.right+=1;
+        data.select = 1 //标记该条数据选对
+      }else{
+        this.error+=1;
+        data.select = 2 //标记该条数据选错
+      }
+      //给所有正确答案打勾
+      checked.filter((v,i,arr) =>{
+        childList.forEach(el =>{
           if (el.flag === v) {
             el.checked = 1;
           }
         })
       })
-      let newArr = result.concat(checked);
-      checked.filter((v,i,arr)=>{
-        newArr.filter((el,index,ags)=>{
-          if (v === el) {
-            newArr.splice(index,1,'item')
+      //给选错的打X
+      errorAry.forEach((v,i) =>{
+        childList.forEach((el,index) =>{
+          if(v === el.flag) {
+            el.checked = 2;
           }
         })
       })
-      newArr.forEach(el=>{
-        childList.forEach(item=>{
-          if (el === item.flag) {
-            item.checked = 2;
-          }
-        })
-      })
-      let i = 0
-      while (childList[i]){
-        if (childList[i].checked==2) {
-          this.error+=1;
-          return
-        }
-        i++
-      }
-      this.fractions += parseInt(fractions)
-      this.right+=1;
     },
     getInfo(data){
       // findSwer
@@ -274,6 +315,7 @@ export default {
           this.expoId = expoId
           data.forEach((item,index,ary) => {
             item.result = []
+            item.select = 3
             item.disable = false;
             let trueAnswer = item.trueAnswer;
             if(item.anType === 1) {
@@ -330,14 +372,14 @@ export default {
     },
     startTime(){
       this.stimer = window.setInterval(()=>{
-        if(this.dataList[this.current].ruleId){
+        if(this.dataList[this.current].ruleId && !this.dataList[this.current].disable){
           this.dataList[this.current].ruleId --;
           this.secondTime+=1
+          this.actived = this.dataList[this.current].ruleId
         }
         if(this.dataList[this.current].ruleId === 0){
           this.dataList[this.current].disable = true
-          window.clearInterval(this.stimer);
-          // this.$refs.next.next();
+          this.$refs.next.next();
         }
         if(this.dataList.length === this.current){
 
@@ -405,46 +447,9 @@ export default {
         this.checkboxClick(data)
       }
     },
-
     onChangeRadio(e,item){
       console.log(e);
       console.log(item);
-      /*
-      item.disable = true;
-      if(e == item.checked){
-        this.right+=1;
-        this.fractions += parseInt(item.fractions)
-      }
-      item.childList.forEach(el=>{
-
-        if(el.flag == item.checked){
-          el.checked = 1;
-        }
-        if(e == el.flag && e !== item.checked){
-          el.checked = 2;
-          this.error+=1;
-        }
-      })
-      setTimeout(_=>{
-        this.$refs.next.next();
-      },500)
-      if(this.current === this.dataList.length -1){
-        setTimeout(_=>{
-          this.$dialog.confirm({
-            title: '温馨提示',
-            message: '当前已是最后一题，答完请交卷',
-            confirmButtonText:'交卷',
-            cancelButtonText:'继续答题',
-
-          }).then(() => {
-            // on confirm
-            this.submit()
-          }).catch(() => {
-            // on cancel
-          });
-        },1000)
-      }
-      */
     },
     submit(){
       let longTime = this.longTime - (this.minutes * 60 + this.seconds)
@@ -491,7 +496,7 @@ export default {
 
     },
     onChange(index) {
-      if(this.stimer && this.dataList[this.current].ruleId === 0){
+      if(this.stimer && this.actived === this.dataList[this.current].ruleId){
         window.clearInterval(this.stimer);
       }
 
@@ -600,6 +605,20 @@ export default {
 </script>
 
 <style scoped>
+.one-box{
+  display: flex;
+  font-size: 12px;
+  padding: 4px 0;
+}
+.box-success{
+  color: #07c160;
+}
+.box-item-width{
+  width: 60px;
+}
+.box-item {
+  flex: 1;
+}
 .timer{
   max-width: 1024px;
   left: auto;
@@ -688,5 +707,14 @@ export default {
 .numIndex{
   display: inline-block;
 
+}
+.status-img{
+  position: absolute;
+  top: -30px;
+  right: 0;
+}
+.status-item{
+  width: 80px;
+  transform: rotate(30deg);
 }
 </style>
