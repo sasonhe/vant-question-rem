@@ -3,7 +3,7 @@
   <van-nav-bar
   class="timer"
   :title="`题/秒 倒计时 ${timeNum}`"
-  :left-text="name"
+  :left-text="username"
   :right-text="fractions+'分'"
   fixed
   />
@@ -318,7 +318,7 @@ export default {
 
           this.userId = userId
           this.numbers = numbers
-          this.name = name
+          // this.name = name
           this.expoId = expoId
           data.forEach((item,index,ary) => {
             item.result = []
