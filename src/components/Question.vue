@@ -124,164 +124,6 @@ export default {
       minutes: '', //分
       seconds: 0, //秒
       caseType:["A","B","C","D","E","F"],
-      data:[
-        {
-          id:2,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。C、D',
-          type:1,
-          result:[],
-          checked:["多选题3","多选题4"],
-          disable:false,
-          answer:[
-            {
-              name:'多选题1',
-              checked:0
-            },
-            {
-              name:'多选题2',
-              checked:0
-            },
-            {
-              name:'多选题3',
-              checked:0
-            },
-            {
-              name:'多选题4',
-              checked:0
-            }
-          ]
-        },
-        {
-          id:0,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。A',
-          type:0,
-          result:[],
-          checked:'单选题 1',
-          disable:false,
-          answer:[
-            {
-              name:'单选题 1',
-              checked:0
-            },
-            {
-              name:'单选题 2',
-              checked:0
-            },
-            {
-              name:'单选题 3',
-              checked:0
-            },
-            {
-              name:'单选题 4',
-              checked:0
-            }
-          ]
-        },
-        {
-          id:1,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。B',
-          type:0,
-          result:[],
-          checked:'单选题 2',
-          disable:false,
-          answer:[
-            {
-              name:'单选题 1',
-              checked:0
-            },
-            {
-              name:'单选题 2',
-              checked:0
-            },
-            {
-              name:'单选题 3',
-              checked:0
-            },
-            {
-              name:'单选题 4',
-              checked:0
-            }
-          ]
-        },
-        {
-          id:6,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。C',
-          type:0,
-          result:[],
-          checked:'单选题 6',
-          disable:false,
-          answer:[
-            {
-              name:'单选题 1',
-              checked:0
-            },
-            {
-              name:'单选题 2',
-              checked:0
-            },
-            {
-              name:'单选题 6',
-              checked:0
-            },
-            {
-              name:'单选题 4',
-              checked:0
-            }
-          ]
-        },
-        {
-          id:3,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。D',
-          type:0,
-          result:[],
-          checked:'单选题 4',
-          disable:false,
-          answer:[
-            {
-              name:'单选题 1',
-              checked:0
-            },
-            {
-              name:'单选题 2',
-              checked:0
-            },
-            {
-              name:'单选题 3',
-              checked:0
-            },
-            {
-              name:'单选题 4',
-              checked:0
-            }
-          ]
-        },
-        {
-          id:4,
-          title:'有赞前端团队是由一群年轻、皮实、对技术饱含热情的小伙伴组成的，目前共有 100 多名前端工程师，分布在业务中台、电商、零售、美业、资产、赋能等业务线。A、B、C',
-          type:1,
-          result:[],
-          checked:["多选题1","多选题3","多选题2"],
-          disable:false,
-          answer:[
-            {
-              name:'多选题1',
-              checked:0
-            },
-            {
-              name:'多选题2',
-              checked:0
-            },
-            {
-              name:'多选题3',
-              checked:0
-            },
-            {
-              name:'多选题4',
-              checked:0
-            }
-          ]
-        }
-      ]
     }
   },
   created(){
@@ -301,6 +143,34 @@ export default {
     }
   },
   methods: {
+    // 多选判断
+    getResult (checked,isTrue) {
+       let result = false;
+       let cLen = checked.length;
+       let iLen = isTrue.length;
+       if(cLen === iLen){
+        isTrue.forEach((item,index) => {
+         if(checked.indexOf(item) != -1) {
+          result = true
+         }else {
+          result = false
+         }
+        })
+       }
+       return result
+     },
+    // 数组差值
+    subSet(arr1, arr2) {
+      var len = arr1.length;
+      var arr = [];
+
+      while (len--) {
+        if (arr2.indexOf(arr1[len]) < 0) {
+            arr.push(arr1[len]);
+        }
+      }
+      return arr;
+    },
     checkedRadio(e,item,items,flag){
       if(item.disable) return
       item.childList.forEach(el=>{
@@ -375,38 +245,33 @@ export default {
       },500)
       data.disable = true;
       let {result,checked,childList,fractions} = data;
-      checked.filter((v,i,arr)=>{
-        childList.forEach(el=>{
+      let isTrue = this.getResult(checked,result)
+      let errorAry = this.subSet(result,checked) //获取差值
+      //对的加分记录
+      if(isTrue) {
+        this.fractions += parseInt(fractions)
+        this.right+=1;
+        data.select = 1 //标记该条数据选对
+      }else{
+        this.error+=1;
+        data.select = 2 //标记该条数据选错
+      }
+      //给所有正确答案打勾
+      checked.filter((v,i,arr) =>{
+        childList.forEach(el =>{
           if (el.flag === v) {
             el.checked = 1;
           }
         })
       })
-      let newArr = result.concat(checked);
-      checked.filter((v,i,arr)=>{
-        newArr.filter((el,index,ags)=>{
-          if (v === el) {
-            newArr.splice(index,1,'item')
+      //给选错的打X
+      errorAry.forEach((v,i) =>{
+        childList.forEach((el,index) =>{
+          if(v === el.flag) {
+            el.checked = 2;
           }
         })
       })
-      newArr.forEach(el=>{
-        childList.forEach(item=>{
-          if (el === item.flag) {
-            item.checked = 2;
-          }
-        })
-      })
-      let i = 0
-      while (childList[i]){
-        if (childList[i].checked==2) {
-          this.error+=1;
-          return
-        }
-        i++
-      }
-      this.fractions += parseInt(fractions)
-      this.right+=1;
     },
     getInfo(data){
       return this.$http.findSwer(data).then(res => {
