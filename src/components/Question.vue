@@ -127,6 +127,7 @@ export default {
       dataList:[],
       fractions:0,
       name:'',
+      username:'',
       userId:'',
       turn:'',
       expoId:'',
@@ -355,17 +356,14 @@ export default {
           if(this.stimer){
             window.clearInterval(this.stimer);
           }
-          this.startTime()
-
-          // window.clearInterval(this.time);
           // 倒计时
-          // setTimeout(()=>{
-          //   this.$dialog.alert({
-          //     message: '题目已加载，请点击确认开始答题',
-          //   }).then(() => {
-          //     this.timer();
-          //   },2000);
-          // })
+          setTimeout(()=>{
+            this.$dialog.alert({
+              message: '题目已加载，请点击确认开始答题',
+            }).then(() => {
+              this.startTime()
+            },2000);
+          })
         }else{
           this.$notify({
             type: 'danger',
@@ -476,7 +474,7 @@ export default {
       let data = {
         id:this.userId,
         turn:this.numbers,
-        name:this.name,
+        name:this.username,
         expoId:this.expoId,
         sumScore:this.fractions,
         longTime:longTime,
