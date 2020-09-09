@@ -143,6 +143,34 @@ export default {
     }
   },
   methods: {
+    // 多选判断
+    getResult (checked,isTrue) {
+       let result = false;
+       let cLen = checked.length;
+       let iLen = isTrue.length;
+       if(cLen === iLen){
+        isTrue.forEach((item,index) => {
+         if(checked.indexOf(item) != -1) {
+          result = true
+         }else {
+          result = false
+         }
+        })
+       }
+       return result
+     },
+    // 数组差值
+    subSet(arr1, arr2) {
+      var len = arr1.length;
+      var arr = [];
+
+      while (len--) {
+        if (arr2.indexOf(arr1[len]) < 0) {
+            arr.push(arr1[len]);
+        }
+      }
+      return arr;
+    },
     checkedRadio(e,item,items,flag){
       if(item.disable) return
       item.childList.forEach(el=>{
@@ -217,38 +245,33 @@ export default {
       },500)
       data.disable = true;
       let {result,checked,childList,fractions} = data;
-      checked.filter((v,i,arr)=>{
-        childList.forEach(el=>{
+      let isTrue = this.getResult(checked,result)
+      let errorAry = this.subSet(result,checked) //获取差值
+      //对的加分记录
+      if(isTrue) {
+        this.fractions += parseInt(fractions)
+        this.right+=1;
+        data.select = 1 //标记该条数据选对
+      }else{
+        this.error+=1;
+        data.select = 2 //标记该条数据选错
+      }
+      //给所有正确答案打勾
+      checked.filter((v,i,arr) =>{
+        childList.forEach(el =>{
           if (el.flag === v) {
             el.checked = 1;
           }
         })
       })
-      let newArr = result.concat(checked);
-      checked.filter((v,i,arr)=>{
-        newArr.filter((el,index,ags)=>{
-          if (v === el) {
-            newArr.splice(index,1,'item')
+      //给选错的打X
+      errorAry.forEach((v,i) =>{
+        childList.forEach((el,index) =>{
+          if(v === el.flag) {
+            el.checked = 2;
           }
         })
       })
-      newArr.forEach(el=>{
-        childList.forEach(item=>{
-          if (el === item.flag) {
-            item.checked = 2;
-          }
-        })
-      })
-      let i = 0
-      while (childList[i]){
-        if (childList[i].checked==2) {
-          this.error+=1;
-          return
-        }
-        i++
-      }
-      this.fractions += parseInt(fractions)
-      this.right+=1;
     },
     getInfo(data){
       return this.$http.findSwer(data).then(res => {
@@ -389,44 +412,7 @@ export default {
     },
 
     onChangeRadio(e,item){
-      console.log(e);
-      console.log(item);
-      /*
-      item.disable = true;
-      if(e == item.checked){
-        this.right+=1;
-        this.fractions += parseInt(item.fractions)
-      }
-      item.childList.forEach(el=>{
 
-        if(el.flag == item.checked){
-          el.checked = 1;
-        }
-        if(e == el.flag && e !== item.checked){
-          el.checked = 2;
-          this.error+=1;
-        }
-      })
-      setTimeout(_=>{
-        this.$refs.next.next();
-      },500)
-      if(this.current === this.dataList.length -1){
-        setTimeout(_=>{
-          this.$dialog.confirm({
-            title: '温馨提示',
-            message: '当前已是最后一题，答完请交卷',
-            confirmButtonText:'交卷',
-            cancelButtonText:'继续答题',
-
-          }).then(() => {
-            // on confirm
-            this.submit()
-          }).catch(() => {
-            // on cancel
-          });
-        },1000)
-      }
-      */
     },
     submit(){
       let longTime = this.longTime - (this.minutes * 60 + this.seconds)
