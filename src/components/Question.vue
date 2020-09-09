@@ -170,6 +170,22 @@ export default {
     }
   },
   methods: {
+    // 多选判断
+    getResult (checked,isTrue) {
+       let result = false;
+       let cLen = checked.length;
+       let iLen = isTrue.length;
+       if(cLen === iLen){
+        isTrue.forEach((item,index) => {
+         if(checked.indexOf(item) != -1) {
+          result = true
+         }else {
+          result = false
+         }
+        })
+       }
+       return result
+     },
     // 数组差值
     subSet(arr1, arr2) {
       var len = arr1.length;
@@ -257,19 +273,10 @@ export default {
       },500)
       data.disable = true;
       let {result,checked,childList,fractions} = data;
-      let sLen = 0 //记录选对的个数
-      let len = checked.length;//正确答案个数
+      let isTrue = this.getResult(checked,result)
       let errorAry = this.subSet(result,checked) //获取差值
-      checked.forEach((e,i) => {
-        result.forEach((s,n) => {
-          if(e === s){
-            sLen += 1
-          }
-        })
-      })
-
       //对的加分记录
-      if(len === sLen) {
+      if(isTrue) {
         this.fractions += parseInt(fractions)
         this.right+=1;
         data.select = 1 //标记该条数据选对
