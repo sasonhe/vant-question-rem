@@ -202,13 +202,13 @@ export default {
              result = false
              throw new Error("ending");
             }
-
           })
-          return result
+          // return result
          }
        } catch (e) {
-
+         result = false
        }
+       return result
      },
     // 数组差值
     subSet(arr1, arr2) {
@@ -320,7 +320,6 @@ export default {
       errorAry.forEach((v,i) =>{
         childList.forEach((el,index) =>{
           if(v === el.flag) {
-            console.log('error');
             el.checked = 2;
           }
         })
