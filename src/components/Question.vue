@@ -106,12 +106,27 @@
         <span class="icon-text">{{right}}</span>
       </span>
     </van-tabbar-item>
-    <van-tabbar-item>
+    <van-tabbar-item  @click="showpopup = !showpopup">
       <van-icon class="icon-custon" name="share" />
       <span class="icon-text">{{current+1}}/{{dataList.length}}</span>
     </van-tabbar-item>
   </van-tabbar>
-
+  <!-- <van-popup
+    v-model="showpopup"
+    closeable
+    position="bottom"
+    :style="{ height: '40%' }"
+  >
+  <div class="nameList">
+    <van-row gutter="20">
+      <van-col span="6" class="span" v-for="item in 30" :key="item">
+        <div class="btn">
+          {{item}}
+        </div>
+      </van-col>
+    </van-row>
+  </div>
+  </van-popup> -->
 </div>
 </template>
 
@@ -119,6 +134,7 @@
 export default {
   data() {
     return {
+      showpopup:false,
       secondTime:0,
       actived:null,
       awaitTimer:null,
@@ -153,6 +169,7 @@ export default {
     Array.prototype.diff = function(a) {
       return this.filter(function(i) {return a.indexOf(i) < 0;});
     };
+
   },
   created(){
     let expoId = this.$route.query.expoId;
@@ -172,20 +189,26 @@ export default {
   },
   methods: {
     // 多选判断
-    getResult (checked,isTrue) {
+    getResult(checked,isTrue) {
        let result = false;
        let cLen = checked.length;
        let iLen = isTrue.length;
-       if(cLen === iLen){
-        isTrue.forEach((item,index) => {
-         if(checked.indexOf(item) != -1) {
-          result = true
-         }else {
-          result = false
+       try {
+         if(cLen === iLen){
+          checked.forEach((item,index) => {
+            if(isTrue.includes(item)) {
+             result = true
+            }else {
+             result = false
+             throw new Error("ending");
+            }
+
+          })
+          return result
          }
-        })
+       } catch (e) {
+
        }
-       return result
      },
     // 数组差值
     subSet(arr1, arr2) {
@@ -297,6 +320,7 @@ export default {
       errorAry.forEach((v,i) =>{
         childList.forEach((el,index) =>{
           if(v === el.flag) {
+            console.log('error');
             el.checked = 2;
           }
         })
@@ -304,18 +328,15 @@ export default {
     },
     getInfo(data){
       // findSwer
-      return this.$http.findLocal(data).then(res => {
+      return this.$http.findSwer(data).then(res => {
 
         if(res.errcode === 0){
           let data = res.data;
           let userId = res.userId;//选手ID
           let numbers = res.numbers;//轮数
           let expoId = res.expoId;//活动ID
-          let name = res.name;//选手姓名
-          // if(res.data && res.data[0].ruleId){
-          //   let s = res.data[0].ruleId
-          //   this.secondTime = s
-          // }
+          // let name = res.name;//选手姓名
+
 
           this.userId = userId
           this.numbers = numbers
@@ -457,7 +478,6 @@ export default {
       console.log(item);
     },
     submit(){
-      let longTime = this.longTime - (this.minutes * 60 + this.seconds)
       let str = ''
       this.dataList.forEach((item, index) => {
         let num = index + 1
@@ -477,13 +497,13 @@ export default {
         name:this.username,
         expoId:this.expoId,
         sumScore:this.fractions,
-        longTime:longTime,
+        longTime:this.secondTime,
         ruleId:str
       }
       this.$http.insertScore(data).then(res => {
         if(res.errcode === 0){
           this.$router.push({
-            path:`/success/${this.name}/${this.fractions}/${longTime}`,
+            path:`/success/${this.username}/${this.fractions}/${this.secondTime}`,
             query:{
               uid:this.uid,
               expoId:this.expoId,
@@ -721,5 +741,21 @@ export default {
 .status-item{
   width: 80px;
   transform: rotate(30deg);
+}
+.nameList{
+  padding: 60px 10px 10px;
+}
+.span{
+  text-align: center;
+  margin-bottom: 10px;
+}
+.btn{
+  padding: 10px 2px;
+  /* width: 82px; */
+  background: #759b67;
+  font-size: 14px;
+  color: #fff;
+  margin: 0 auto;
+  cursor: pointer;
 }
 </style>

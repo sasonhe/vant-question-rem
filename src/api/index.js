@@ -16,6 +16,12 @@ const findNext = data => http.get('/api/swer/findNext.do',{params:data}) //下�
 const u = './static/findSwer.json'
 const findLocal = data => http.get(u,{params:data}) //下一轮
 
+/**
+ * 每大屏幕
+ */
+const getAllLists = data => http.get('/api/swer/getAllLists.do',{params:data})
+
+
 export default {
   getQuestionList,
   findSwer,
@@ -23,5 +29,7 @@ export default {
   getList,
   setList,
   findNext,
-  findLocal
+  findLocal,
+
+  getAllLists,
 }

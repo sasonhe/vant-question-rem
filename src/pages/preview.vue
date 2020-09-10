@@ -1,20 +1,24 @@
 <template>
   <div class="view-wrapper" :style="{backgroundImage:'url('+bgUrl+')'}">
     <div class="view">
-      <div class="title">竞赛活动排名</div>
-      <div class="mtitle">(当前第 {{turn}} 轮)</div>
+      <!-- <div class="title">竞赛活动排名</div>
+      <div class="mtitle">(当前第 {{turn}} 轮)</div> -->
+      <div class="title">2020年广东省全民科学素质大赛</div>
+      <div class="mtitle">晋级赛排名</div>
       <div class="list">
         <table class="table">
           <thead>
             <tr>
               <th class="num">排名</th>
-              <th>姓名</th>
+              <th>组别</th>
 
               <!-- <th>轮次</th> -->
               <!-- <th>最高分</th>
               <th>最低分</th>
               <th>平均分</th> -->
-              <th>总分数</th>
+              <th>抢答总分数</th>
+              <th>必答总分数</th>
+              <th>累计总分数</th>
               <th>用时</th>
             </tr>
           </thead>
@@ -29,7 +33,9 @@
               <!-- <td>{{item.maxScore}}</td>
               <td>{{item.minScore}}</td>
               <td>{{item.averageScore}}</td> -->
+              <td>{{item.averageScore}}</td>
               <td>{{item.sumScore}}</td>
+              <td>{{item.averageScore+item.sumScore}}</td>
               <td>{{item.longTime?item.longTime+' 秒':''}}</td>
             </tr>
           </tbody>
@@ -70,6 +76,11 @@ export default {
     window.clearInterval(this.time);
     this.timer()
   },
+  destroyed(){
+    if(this.time){
+      window.clearInterval(this.time);
+    }
+  },
   methods:{
     getList(){
       let data = {
@@ -77,7 +88,7 @@ export default {
         turn:this.$route.query.turn || 1,
         type:this.type
       }
-      this.$http.getList(data).then( res => {
+      this.$http.getAllLists(data).then( res => {
         if(res.errcode === 0){
           this.data = res.data
           this.turn = res.numbers
@@ -187,6 +198,9 @@ export default {
   color: #fff;
   font-size: 22px;
   border-collapse: collapse;
+}
+.table tbody tr{
+  background: rgba(0,0,0,0.6);
 }
 .table thead th{
   padding: 6px 0;
