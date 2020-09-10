@@ -144,18 +144,24 @@ export default {
   },
   methods: {
     // 多选判断
-    getResult (checked,isTrue) {
+    getResult(checked,isTrue) {
        let result = false;
        let cLen = checked.length;
        let iLen = isTrue.length;
-       if(cLen === iLen){
-        isTrue.forEach((item,index) => {
-         if(checked.indexOf(item) != -1) {
-          result = true
-         }else {
-          result = false
+       try {
+         if(cLen === iLen){
+          checked.forEach((item,index) => {
+            if(isTrue.includes(item)) {
+             result = true
+            }else {
+             result = false
+             throw new Error("ending");
+            }
+          })
+          // return result
          }
-        })
+       } catch (e) {
+         result = false
        }
        return result
      },
