@@ -1,5 +1,8 @@
 <template>
   <div class="view-wrapper" :style="{backgroundImage:'url('+bgUrl+')'}">
+    <div class="srolle">
+
+
     <div class="view">
       <!-- <div class="title">竞赛活动排名</div>
       <div class="mtitle">(当前第 {{turn}} 轮)</div> -->
@@ -40,6 +43,7 @@
           <van-col class="btn-w" span="8"><van-button @click="setList(3)" class="btn" size="large" style="color:#4397c1" type="default">下一轮</van-button></van-col>
         </van-row>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -180,12 +184,20 @@ export default {
 </script>
 
 <style scoped>
+.srolle{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
 .view {
   height: 100vh;
   padding-top: 10px;
   max-width: 1200px;
   margin: 0 auto;
-  overflow: auto;
+  /* overflow: auto; */
   box-sizing: border-box;
 }
 .view-wrapper{
