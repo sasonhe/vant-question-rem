@@ -92,11 +92,11 @@
 
 
   </div>
-  <van-tabbar v-model="active" class="tabbar" active-color="#646566">
-    <!-- <van-tabbar-item @click="onClickRight()">
+  <!-- <van-tabbar v-model="active" class="tabbar" active-color="#646566">
+    <van-tabbar-item @click="onClickRight()">
       <van-icon class="icon-custon" name="notes-o" color="#07c160" />
       <span class="icon-text">交卷</span>
-    </van-tabbar-item> -->
+    </van-tabbar-item>
     <van-tabbar-item>
       <span class="num-text">
         <van-icon class="icon-custon" name="close" color="red" />
@@ -111,7 +111,7 @@
       <van-icon class="icon-custon" name="share" />
       <span class="icon-text">{{current+1}}/{{dataList.length}}</span>
     </van-tabbar-item>
-  </van-tabbar>
+  </van-tabbar> -->
 
 </div>
 </template>
@@ -120,6 +120,7 @@
 export default {
   data() {
     return {
+      stimer:null,
       dlogs:null,
       waits:null,
       numbers:0,
@@ -182,6 +183,9 @@ export default {
     if(this.stimernext){
       window.clearInterval(this.stimernext);
     }
+    if(this.stimer){
+      window.clearInterval(this.stimer);
+    }
   },
   methods: {
     // 多选判断
@@ -236,15 +240,18 @@ export default {
 
       }).then(() => {
         //调用保存接口
-        data.disable = true;
+        // data.disable = true;
         data.childList.forEach(el=>{
 
           // 给选对的计分
           if(el.checked === 1 && el.flag === data.checked) {
             this.right+=1;
-            this.fractions += parseInt(data.fractions)
+            // this.fractions += parseInt(data.fractions)
+            this.fractions = parseInt(data.fractions)
             data.select = 1
           }
+
+          /*
           // 给选错的项打 X
           if(el.checked === 1 && el.flag !== data.checked) {
             this.error+=1;
@@ -255,9 +262,29 @@ export default {
           if(el.flag === data.checked) {
             el.checked = 1;
           }
+           */
+
 
         })
         this.submit().then(res => {
+          if(res){
+            data.disable = true;
+            data.childList.forEach(el=>{
+
+              // 给选错的项打 X
+              if(el.checked === 1 && el.flag !== data.checked) {
+                this.error+=1;
+                el.checked = 2;
+                data.select = 2
+              }
+              // 给正确的那一项打勾
+              if(el.flag === data.checked) {
+                el.checked = 1;
+              }
+
+
+            })
+          }
           /*
           this.waits = this.$toast.loading({
             message: '下一轮，等待中...',
@@ -304,19 +331,22 @@ export default {
       setTimeout(_=>{
         this.$refs.next.next();
       },500)
-      data.disable = true;
+
       let {result,checked,childList,fractions} = data;
       let isTrue = this.getResult(checked,result)
       let errorAry = this.subSet(result,checked) //获取差值
       //对的加分记录
       if(isTrue) {
-        this.fractions += parseInt(fractions)
+        // this.fractions += parseInt(fractions)
+        this.fractions = parseInt(fractions)
         this.right+=1;
         data.select = 1 //标记该条数据选对
       }else{
         this.error+=1;
         data.select = 2 //标记该条数据选错
       }
+
+      /*
       //给所有正确答案打勾
       checked.filter((v,i,arr) =>{
         childList.forEach(el =>{
@@ -333,8 +363,29 @@ export default {
           }
         })
       })
+       */
+
 
       this.submit().then(res => {
+        if(res){
+          data.disable = true;
+          //给所有正确答案打勾
+          checked.filter((v,i,arr) =>{
+            childList.forEach(el =>{
+              if (el.flag === v) {
+                el.checked = 1;
+              }
+            })
+          })
+          //给选错的打X
+          errorAry.forEach((v,i) =>{
+            childList.forEach((el,index) =>{
+              if(v === el.flag) {
+                el.checked = 2;
+              }
+            })
+          })
+        }
         /*
         this.waits = this.$toast.loading({
           message: '下一轮，等待中...',
@@ -468,9 +519,9 @@ export default {
             }
           })
           this.dataList = data
-          if(this.stimer){
-            window.clearInterval(this.stimer);
-          }
+          // 计时
+          this.secondTime = 0;
+          this.startTime()
           // 倒计时
           /*
           setTimeout(()=>{
@@ -495,6 +546,7 @@ export default {
         waits.clear()
       })
     },
+    /*
     startTime(){
       this.stimer = window.setInterval(()=>{
         if(this.dataList[this.current].ruleId && !this.dataList[this.current].disable){
@@ -512,6 +564,15 @@ export default {
         }
       },1000)
     },
+     */
+     startTime(){
+       if(this.stimer){
+         window.clearInterval(this.stimer);
+       }
+       this.stimer = window.setInterval(()=>{
+         this.secondTime+=1
+       },1000)
+     },
     startNext(){
       if(this.stimernext){
         window.clearInterval(this.stimernext);
@@ -620,6 +681,10 @@ export default {
         duration:0,
       });
       return this.$http.insertScore(data).then(res => {
+        if(this.stimer){
+          window.clearInterval(this.stimer);
+        }
+        this.fractions = 0
         waits.clear()
         if(res.errcode === 0){
           this.$toast({
@@ -639,12 +704,13 @@ export default {
         }else{
           this.$notify({
             type: 'danger',
-            message: res.errmsg,
+            message: '当前题目已停止作答或已提交',//res.errmsg,
             duration:8000
           })
           return false
         }
       }).catch(err => {
+        this.fractions = 0
         waits.clear()
         this.$toast({
           message:'提交失败，请重试',

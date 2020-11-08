@@ -19,8 +19,12 @@
               <td>{{item.urlsname}}</td>
 
               <td>
-                <span v-if="item.sumScore>0" style="color:#4397c1;">答对</span>
-                <span v-if="item.sumScore<=0" style="color:red;">答错</span>
+                <span v-if="item.sumScore>0" style="color:#4397c1;">
+                  <van-icon name="success" size="50"/>
+                </span>
+                <span v-if="item.sumScore<=0" style="color:red;">
+                  <van-icon name="cross" size="50"/>
+                </span>
               </td>
             </tr>
           </tbody>
@@ -124,7 +128,7 @@ export default {
       if(flog === 2) {
         data = {
           expoId:this.expoid,
-          turn:this.turn,
+          turn:1,//this.turn,
           type:1
         }
       }
