@@ -1,10 +1,11 @@
 <template>
 <div class="question">
+  <!-- :title="`题/秒 倒计时 ${timeNum}`"   :right-text="fractions+'分'" -->
   <van-nav-bar
   class="timer"
-  :title="`题/秒 倒计时 ${timeNum}`"
+
   :left-text="username"
-  :right-text="fractions+'分'"
+  :right-text="`第 ${numbers} 轮`"
   fixed
   />
   <div class="-body">
@@ -14,7 +15,7 @@
           <van-tag mark type="primary">{{item.anType===1?"单选题":"多选题"}}</van-tag>
         </div>
         <div class="topic-title van-hairline--bottom">
-          <span class="numIndex">{{index+1}}.</span>
+          <!-- <span class="numIndex">{{index+1}}.</span> -->
           {{item.anName}}
         </div>
         <div class="topic-action" style="position:relative;">
@@ -92,10 +93,10 @@
 
   </div>
   <van-tabbar v-model="active" class="tabbar" active-color="#646566">
-    <van-tabbar-item @click="onClickRight()">
+    <!-- <van-tabbar-item @click="onClickRight()">
       <van-icon class="icon-custon" name="notes-o" color="#07c160" />
       <span class="icon-text">交卷</span>
-    </van-tabbar-item>
+    </van-tabbar-item> -->
     <van-tabbar-item>
       <span class="num-text">
         <van-icon class="icon-custon" name="close" color="red" />
@@ -111,22 +112,7 @@
       <span class="icon-text">{{current+1}}/{{dataList.length}}</span>
     </van-tabbar-item>
   </van-tabbar>
-  <!-- <van-popup
-    v-model="showpopup"
-    closeable
-    position="bottom"
-    :style="{ height: '40%' }"
-  >
-  <div class="nameList">
-    <van-row gutter="20">
-      <van-col span="6" class="span" v-for="item in 30" :key="item">
-        <div class="btn">
-          {{item}}
-        </div>
-      </van-col>
-    </van-row>
-  </div>
-  </van-popup> -->
+
 </div>
 </template>
 
@@ -134,6 +120,9 @@
 export default {
   data() {
     return {
+      dlogs:null,
+      waits:null,
+      numbers:0,
       showpopup:false,
       secondTime:0,
       actived:null,
@@ -171,7 +160,7 @@ export default {
     };
 
   },
-  created(){
+  async created(){
     let expoId = this.$route.query.expoId;
     let uid = this.$route.query.uid;
     let username = this.$route.query.username;
@@ -184,7 +173,14 @@ export default {
         uid:uid,
         username:username
       }
-      this.getInfo(data)
+      await this.getInfo(data)
+      this.startNext()
+
+    }
+  },
+  destroyed(){
+    if(this.stimernext){
+      window.clearInterval(this.stimernext);
     }
   },
   methods: {
@@ -231,49 +227,61 @@ export default {
     },
     // 单选处理
     radioClick(data){
-      data.disable = true;
-      data.childList.forEach(el=>{
 
-        // 给选对的计分
-        if(el.checked === 1 && el.flag === data.checked) {
-          this.right+=1;
-          this.fractions += parseInt(data.fractions)
-          data.select = 1
-        }
-        // 给选错的项打 X
-        if(el.checked === 1 && el.flag !== data.checked) {
-          this.error+=1;
-          el.checked = 2;
-          data.select = 2
-        }
-        // 给正确的那一项打勾
-        if(el.flag === data.checked) {
-          el.checked = 1;
-        }
+      this.$dialog.confirm({
+        title: '温馨提示',
+        message: '确定要提交答案吗？',
+        confirmButtonText:'提交',
+        cancelButtonText:'继续答题',
 
-      })
+      }).then(() => {
+        //调用保存接口
+        data.disable = true;
+        data.childList.forEach(el=>{
+
+          // 给选对的计分
+          if(el.checked === 1 && el.flag === data.checked) {
+            this.right+=1;
+            this.fractions += parseInt(data.fractions)
+            data.select = 1
+          }
+          // 给选错的项打 X
+          if(el.checked === 1 && el.flag !== data.checked) {
+            this.error+=1;
+            el.checked = 2;
+            data.select = 2
+          }
+          // 给正确的那一项打勾
+          if(el.flag === data.checked) {
+            el.checked = 1;
+          }
+
+        })
+        this.submit().then(res => {
+          /*
+          this.waits = this.$toast.loading({
+            message: '下一轮，等待中...',
+            forbidClick: true,
+            // overlay:true,
+            duration:0,
+            className:'waits',
+            loadingType: 'spinner',
+          });
+           */
+        })
+
+      }).catch(() => {
+        // on cancel
+      });
+      return
       setTimeout(_=>{
         this.$refs.next.next();
       },500)
-      if(this.current === this.dataList.length -1){
-        setTimeout(_=>{
-          this.$dialog.confirm({
-            title: '温馨提示',
-            message: '当前已是最后一题，答完请交卷',
-            confirmButtonText:'交卷',
-            cancelButtonText:'继续答题',
 
-          }).then(() => {
-            // on confirm
-            this.submit()
-          }).catch(() => {
-            // on cancel
-          });
-        },1000)
-      }
     },
     // 多选处理
     checkboxClick(data){
+      /*
       if(this.current === this.dataList.length -1){
         setTimeout(_=>{
           this.$dialog.confirm({
@@ -289,6 +297,7 @@ export default {
           });
         },1000)
       }
+       */
       if (data.disable) {
         return
       }
@@ -324,11 +333,97 @@ export default {
           }
         })
       })
+
+      this.submit().then(res => {
+        /*
+        this.waits = this.$toast.loading({
+          message: '下一轮，等待中...',
+          forbidClick: true,
+          // overlay:true,
+          duration:0,
+          className:'waits',
+          loadingType: 'spinner',
+        });
+         */
+      })
+    },
+    // 监听下一轮
+    nexts(){
+      this.$http.nexts({expoId:this.expoId,numbers:this.numbers+1}).then(res =>{
+        if(res.errcode === 0) {
+          let data = {
+            expoId:this.expoId,
+            uid:this.uid,
+            username:this.username
+          }
+          this.getInfo(data)
+
+          /*
+          if(this.waits){
+            this.waits.clear()
+          }
+          if(this.stimernext){
+            window.clearInterval(this.stimernext);
+          }
+
+          this.$dialog.alert({
+            message: '下一轮已开启，请点击确定加载题目',
+          }).then(() => {
+            let data = {
+              expoId:this.expoId,
+              uid:this.uid,
+              username:this.username
+            }
+            this.getInfo(data)
+          });
+           */
+
+        }else if(res.errcode === -1){
+          if(res.errmsg === '最后一个道题目'){
+            if(this.stimernext){
+              window.clearInterval(this.stimernext);
+            }
+            /*
+            if(this.waits){
+              this.waits.clear()
+
+            }
+            try {
+              if(this.dialogs){
+                this.dialogs.close()
+              }
+            } catch (e) {
+
+            }
+            this.$dialog.alert({
+              message: '题目加载结束',
+            }).then(() => {
+              if(this.stimernext){
+                window.clearInterval(this.stimernext);
+              }
+            });
+             */
+
+
+          }
+        }
+      })
     },
     getInfo(data){
-      // findSwer
+      let waits = this.$toast.loading({
+        message: '加载中...',
+        forbidClick: true,
+        duration:0,
+      });
       return this.$http.findSwer(data).then(res => {
+        try {
+          if(this.dlogs){
+            this.dlogs.close()
+          }
+        } catch (e) {
 
+        }
+        waits.clear()
         if(res.errcode === 0){
           let data = res.data;
           let userId = res.userId;//选手ID
@@ -377,22 +472,27 @@ export default {
             window.clearInterval(this.stimer);
           }
           // 倒计时
+          /*
           setTimeout(()=>{
-            this.$dialog.alert({
+            this.dialogs = this.$dialog.alert({
               message: '题目已加载，请点击确认开始答题',
             }).then(() => {
-              this.startTime()
-            },2000);
-          })
+              this.startNext()
+            });
+          },500)
+           */
         }else{
           this.$notify({
             type: 'danger',
             message: res.errmsg,
             duration:8000,
           })
-          this.awaitFn();
+          this.numbers = 0
+          // this.awaitFn();
         }
         return res
+      }).catch(err => {
+        waits.clear()
       })
     },
     startTime(){
@@ -412,8 +512,16 @@ export default {
         }
       },1000)
     },
+    startNext(){
+      if(this.stimernext){
+        window.clearInterval(this.stimernext);
+      }
+      this.stimernext = window.setInterval(()=>{
+        this.nexts()
+      },10000)
+    },
     awaitFn(){
-      this.$dialog.confirm({
+      this.dlogs = this.$dialog.confirm({
         title: '提示',
         message: '活动暂未启动，可点击刷新查看是否开启',
         // overlay:false,
@@ -432,6 +540,13 @@ export default {
           }
           this.getInfo(data).then(res => {
             if(res.errcode === 0){
+              try {
+                if(this.dlogs){
+                  this.dlogs.close()
+                }
+              } catch (e) {
+
+              }
               done()
             }else{
               done(false)
@@ -499,23 +614,42 @@ export default {
         longTime:this.secondTime,
         ruleId:str
       }
-      this.$http.insertScore(data).then(res => {
+      let waits = this.$toast.loading({
+        message: '加载中...',
+        forbidClick: true,
+        duration:0,
+      });
+      return this.$http.insertScore(data).then(res => {
+        waits.clear()
         if(res.errcode === 0){
-          this.$router.push({
-            path:`/success/${this.username}/${this.fractions}/${this.secondTime}`,
-            query:{
-              uid:this.uid,
-              expoId:this.expoId,
-              turn:this.numbers,
-            }
-          })
+          this.$toast({
+            message:'提交成功',
+            duration:3000,
+            position:'top',
+          });
+          return true
+          // this.$router.push({
+          //   path:`/success/${this.username}/${this.fractions}/${this.secondTime}`,
+          //   query:{
+          //     uid:this.uid,
+          //     expoId:this.expoId,
+          //     turn:this.numbers,
+          //   }
+          // })
         }else{
           this.$notify({
             type: 'danger',
             message: res.errmsg,
             duration:8000
           })
+          return false
         }
+      }).catch(err => {
+        waits.clear()
+        this.$toast({
+          message:'提交失败，请重试',
+          duration:3000,
+        });
       })
 
     },
@@ -527,8 +661,8 @@ export default {
       this.dataList[this.current].ruleId = this.timeNum
       this.current = index;
       if(this.dataList[this.current].ruleId !== 0){
-        window.clearInterval(this.stimer);
-        this.startTime()
+        // window.clearInterval(this.stimer);
+        // this.startTime()
       }
 
     },

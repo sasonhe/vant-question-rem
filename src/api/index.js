@@ -22,6 +22,10 @@ const findLocal = data => http.get(u,{params:data}) //下一轮
 const getAllLists = data => http.get('/api/swer/getAllLists.do',{params:data})
 
 
+const stops = data => http.post('/api/swer/stops.do',data) //停止
+const nexts = data => http.post('/api/swer/nexts.do',data) //监听一下轮接口
+
+
 export default {
   getQuestionList,
   findSwer,
@@ -32,4 +36,7 @@ export default {
   findLocal,
 
   getAllLists,
+
+  stops,
+  nexts,
 }

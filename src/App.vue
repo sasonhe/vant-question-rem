@@ -28,4 +28,7 @@ export default {
 .custom {
   width: 220px;
 }
+.van-toast.waits{
+  width: 300px;
+}
 </style>
