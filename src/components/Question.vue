@@ -308,95 +308,107 @@ export default {
     },
     // 多选处理
     checkboxClick(data){
-      /*
-      if(this.current === this.dataList.length -1){
-        setTimeout(_=>{
-          this.$dialog.confirm({
-            title: '温馨提示',
-            message: '当前已是最后一题，答完请交卷',
-            confirmButtonText:'交卷',
-            cancelButtonText:'继续答题'
-          }).then(() => {
-            // on confirm
-            this.submit()
-          }).catch(() => {
-            // on cancel
-          });
-        },1000)
-      }
-       */
-      if (data.disable) {
-        return
-      }
-      setTimeout(_=>{
-        this.$refs.next.next();
-      },500)
+      this.$dialog.confirm({
+        title: '温馨提示',
+        message: '确定要提交答案吗？',
+        confirmButtonText:'提交',
+        cancelButtonText:'继续答题',
 
-      let {result,checked,childList,fractions} = data;
-      let isTrue = this.getResult(checked,result)
-      let errorAry = this.subSet(result,checked) //获取差值
-      //对的加分记录
-      if(isTrue) {
-        // this.fractions += parseInt(fractions)
-        this.fractions = parseInt(fractions)
-        this.right+=1;
-        data.select = 1 //标记该条数据选对
-      }else{
-        this.error+=1;
-        data.select = 2 //标记该条数据选错
-      }
-
-      /*
-      //给所有正确答案打勾
-      checked.filter((v,i,arr) =>{
-        childList.forEach(el =>{
-          if (el.flag === v) {
-            el.checked = 1;
-          }
-        })
-      })
-      //给选错的打X
-      errorAry.forEach((v,i) =>{
-        childList.forEach((el,index) =>{
-          if(v === el.flag) {
-            el.checked = 2;
-          }
-        })
-      })
-       */
-
-
-      this.submit().then(res => {
-        if(res){
-          data.disable = true;
-          //给所有正确答案打勾
-          checked.filter((v,i,arr) =>{
-            childList.forEach(el =>{
-              if (el.flag === v) {
-                el.checked = 1;
-              }
-            })
-          })
-          //给选错的打X
-          errorAry.forEach((v,i) =>{
-            childList.forEach((el,index) =>{
-              if(v === el.flag) {
-                el.checked = 2;
-              }
-            })
-          })
-        }
+      }).then(() => {
+        //调用保存接口
         /*
-        this.waits = this.$toast.loading({
-          message: '下一轮，等待中...',
-          forbidClick: true,
-          // overlay:true,
-          duration:0,
-          className:'waits',
-          loadingType: 'spinner',
-        });
+        if(this.current === this.dataList.length -1){
+          setTimeout(_=>{
+            this.$dialog.confirm({
+              title: '温馨提示',
+              message: '当前已是最后一题，答完请交卷',
+              confirmButtonText:'交卷',
+              cancelButtonText:'继续答题'
+            }).then(() => {
+              // on confirm
+              this.submit()
+            }).catch(() => {
+              // on cancel
+            });
+          },1000)
+        }
          */
-      })
+        if (data.disable) {
+          return
+        }
+        setTimeout(_=>{
+          this.$refs.next.next();
+        },500)
+
+        let {result,checked,childList,fractions} = data;
+        let isTrue = this.getResult(checked,result)
+        let errorAry = this.subSet(result,checked) //获取差值
+        //对的加分记录
+        if(isTrue) {
+          // this.fractions += parseInt(fractions)
+          this.fractions = parseInt(fractions)
+          this.right+=1;
+          data.select = 1 //标记该条数据选对
+        }else{
+          this.error+=1;
+          data.select = 2 //标记该条数据选错
+        }
+
+        /*
+        //给所有正确答案打勾
+        checked.filter((v,i,arr) =>{
+          childList.forEach(el =>{
+            if (el.flag === v) {
+              el.checked = 1;
+            }
+          })
+        })
+        //给选错的打X
+        errorAry.forEach((v,i) =>{
+          childList.forEach((el,index) =>{
+            if(v === el.flag) {
+              el.checked = 2;
+            }
+          })
+        })
+         */
+
+
+        this.submit().then(res => {
+          if(res){
+            data.disable = true;
+            //给所有正确答案打勾
+            checked.filter((v,i,arr) =>{
+              childList.forEach(el =>{
+                if (el.flag === v) {
+                  el.checked = 1;
+                }
+              })
+            })
+            //给选错的打X
+            errorAry.forEach((v,i) =>{
+              childList.forEach((el,index) =>{
+                if(v === el.flag) {
+                  el.checked = 2;
+                }
+              })
+            })
+          }
+          /*
+          this.waits = this.$toast.loading({
+            message: '下一轮，等待中...',
+            forbidClick: true,
+            // overlay:true,
+            duration:0,
+            className:'waits',
+            loadingType: 'spinner',
+          });
+           */
+        })
+      }).catch(() => {
+        // on cancel
+      });
+
     },
     // 监听下一轮
     nexts(){
