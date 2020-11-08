@@ -1,49 +1,47 @@
 <template>
   <div class="view-wrapper" :style="{backgroundImage:'url('+bgUrl+')'}">
     <div class="srolle">
+      <div class="view">
+        <!-- <div class="title">竞赛活动排名</div>
+        <div class="mtitle">(当前第 {{turn}} 轮)</div> -->
+        <!-- <div class="title">2020年广东省全民科学素质大赛</div> -->
+        <!-- <div class="mtitle">晋级赛排名</div> -->
+        <div class="mtitle">第 {{turn}} 题</div>
+        <div class="list">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="num">姓名</th>
+                <th class="num">得分</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item,index) in data" :key="item.id">
+                <td>{{item.urlsname}}</td>
 
-
-    <div class="view">
-      <!-- <div class="title">竞赛活动排名</div>
-      <div class="mtitle">(当前第 {{turn}} 轮)</div> -->
-      <!-- <div class="title">2020年广东省全民科学素质大赛</div> -->
-      <!-- <div class="mtitle">晋级赛排名</div> -->
-      <div class="mtitle">第 {{turn}} 题</div>
-      <div class="list">
-        <table class="table">
-          <thead>
-            <tr>
-              <th class="num">姓名</th>
-              <th class="num">得分</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item,index) in data" :key="item.id">
-              <td>{{item.urlsname}}</td>
-
-              <td>
-                <span v-if="item.sumScore>0" style="color:#4397c1;">
-                  <van-icon name="success" size="50"/>
-                </span>
-                <span v-if="item.sumScore<=0" style="color:red;">
-                  <van-icon name="cross" size="50"/>
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                <td>
+                  <span v-if="item.sumScore>0" style="color:#4397c1;">
+                    <van-icon name="success" size="50"/>
+                  </span>
+                  <span v-if="item.sumScore<=0" style="color:red;">
+                    <van-icon name="cross" size="50"/>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="btn-list">
+          <van-row>
+            <van-col class="btn-w" span="8"><van-button @click="setList(1)" class="btn" size="large" style="color:#4397c1" type="default">上一轮</van-button></van-col>
+            <van-col class="btn-w" span="8">
+              <van-button @click="setList(2)" class="btn" size="large" style="color:#4397c1" type="default">启动</van-button>
+              <van-button @click="stops()" class="btn" size="large" style="color:#fff" type="danger">停止</van-button>
+            </van-col>
+            <van-col class="btn-w" span="8"><van-button @click="setList(3)" class="btn" size="large" style="color:#4397c1" type="default">下一轮</van-button></van-col>
+          </van-row>
+        </div>
       </div>
-      <div class="btn-list">
-        <van-row>
-          <van-col class="btn-w" span="8"><van-button @click="setList(1)" class="btn" size="large" style="color:#4397c1" type="default">上一轮</van-button></van-col>
-          <van-col class="btn-w" span="8">
-            <van-button @click="setList(2)" class="btn" size="large" style="color:#4397c1" type="default">启动</van-button>
-            <van-button @click="stops()" class="btn" size="large" style="color:#fff" type="danger">停止</van-button>
-          </van-col>
-          <van-col class="btn-w" span="8"><van-button @click="setList(3)" class="btn" size="large" style="color:#4397c1" type="default">下一轮</van-button></van-col>
-        </van-row>
-      </div>
-    </div>
     </div>
   </div>
 </template>
