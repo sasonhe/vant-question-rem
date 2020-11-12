@@ -16,7 +16,7 @@
   // set 1rem = viewWidth / 10
   function setRemUnit () {
     var rem = docEl.clientWidth / 10
-    if(docEl.clientWidth >=1024){
+    if(docEl.clientWidth >=768){
       docEl.style.fontSize = 48 + 'px'
       return
     }
