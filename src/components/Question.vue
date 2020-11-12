@@ -314,9 +314,10 @@ export default {
               item.checked = ''
               item.childList.forEach(el => {
                 el.checked = 0;
-                let ans = el.flag;
+                let ansText = el.flag;
+                let ans = el.flag.substring(0,1);
                 if(ans.indexOf(trueAnswer) != -1){
-                  item.checked = ans
+                  item.checked = ansText
                 }
               })
             }
@@ -325,11 +326,12 @@ export default {
               item.checked = []
               item.childList.forEach(el => {
                 el.checked = 0;
-                let ans = el.flag;
+                let ansText = el.flag;
+                let ans = el.flag.substring(0,1);
                 let ary = trueAnswer.split('')
                 ary.forEach(v=>{
                   if(ans.indexOf(v) != -1){
-                    item.checked.push(ans)
+                    item.checked.push(ansText)
                   }
                 })
               })
