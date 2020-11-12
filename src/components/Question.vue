@@ -242,7 +242,7 @@ export default {
         //调用保存接口
         // data.disable = true;
         data.childList.forEach(el=>{
-
+          debugger
           // 给选对的计分
           if(el.checked === 1 && el.flag === data.checked) {
             this.right+=1;
@@ -503,15 +503,17 @@ export default {
             item.result = []
             item.select = 3
             item.disable = false;
-            let trueAnswer = item.trueAnswer;
+            let trueAnswer = item.trueAnswer; // A
             if(item.anType === 1) {
               //单选
               item.checked = ''
+              debugger
               item.childList.forEach(el => {
                 el.checked = 0;
-                let ans = el.flag;
+                let ansText = el.flag
+                let ans = el.flag.substring(0, 1);//"D、2015 ACR对比剂手册研究未能证实等渗对比剂较低渗对比剂在PC-AKI方面有优势"
                 if(ans.indexOf(trueAnswer) != -1){
-                  item.checked = ans
+                  item.checked = ansText
                 }
               })
             }
@@ -520,11 +522,12 @@ export default {
               item.checked = []
               item.childList.forEach(el => {
                 el.checked = 0;
-                let ans = el.flag;
+                let ansText = el.flag
+                let ans = el.flag.substring(0, 1)
                 let ary = trueAnswer.split('')
                 ary.forEach(v=>{
                   if(ans.indexOf(v) != -1){
-                    item.checked.push(ans)
+                    item.checked.push(ansText)
                   }
                 })
               })
@@ -919,7 +922,7 @@ export default {
 }
 /deep/ .van-radio__label,/deep/ .van-checkbox__label{
   display: inline-block;
-    height: .68rem;
+    /* height: .68rem; */
     line-height: .68rem;
     font-size: 16px;
 }

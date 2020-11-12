@@ -11,8 +11,8 @@
           <table class="table">
             <thead>
               <tr>
-                <th class="num">姓名</th>
-                <th class="num">得分</th>
+                <th class="num">参赛队伍</th>
+                <th class="num">答题情况</th>
               </tr>
             </thead>
             <tbody>
@@ -204,7 +204,7 @@ export default {
   left: 0;
   bottom: 0;
   right: 0;
-  background: #3399CC;
+  /* background: #3399CC; */
   background-size: cover;
   background-repeat: no-repeat;
 }
@@ -218,7 +218,7 @@ export default {
 .mtitle{
   font-size: 24px;
   font-weight: bold;
-  color: #fff;
+  color: #000;
   text-align: center;
 }
 .list{
@@ -227,16 +227,16 @@ export default {
 .table{
   width: 100%;
   text-align: center;
-  color: #fff;
+  color: #000;
   font-size: 22px;
   border-collapse: collapse;
 }
 .table tbody tr{
-  background: rgba(0,0,0,0.6);
+  /* background: rgba(0,0,0,0.6); */
 }
 .table thead th{
   padding: 6px 0;
-  background-color:#6fa3d0;
+  /* background-color:#6fa3d0; */
 }
 .table .num {
   width: 80px;
