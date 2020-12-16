@@ -336,6 +336,7 @@ export default {
               })
             }
              */
+            
              if(item.anType === 1) {
                //单选
                item.checked = ''
