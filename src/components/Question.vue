@@ -309,6 +309,7 @@ export default {
             item.result = []
             item.disable = false;
             let trueAnswer = item.trueAnswer;
+            /*
             if(item.anType === 1) {
               //单选
               item.checked = ''
@@ -334,6 +335,34 @@ export default {
                 })
               })
             }
+             */
+             if(item.anType === 1) {
+               //单选
+               item.checked = ''
+               item.childList.forEach(el => {
+                 el.checked = 0;
+                 let ansText = el.flag;
+                 let ans = el.flag.substring(0,1);
+                 if(ans.indexOf(trueAnswer) != -1){
+                   item.checked = ansText
+                 }
+               })
+             }
+             if(item.anType === 2) {
+               //复选
+               item.checked = []
+               item.childList.forEach(el => {
+                 el.checked = 0;
+                 let ansText = el.flag;
+                 let ans = el.flag.substring(0,1);
+                 let ary = trueAnswer.split('')
+                 ary.forEach(v=>{
+                   if(ans.indexOf(v) != -1){
+                     item.checked.push(ansText)
+                   }
+                 })
+               })
+             }
           })
           this.dataList = data
           window.clearInterval(this.time);
