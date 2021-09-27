@@ -650,7 +650,7 @@ export default {
 }
 /deep/ .van-radio__label,/deep/ .van-checkbox__label{
   display: inline-block;
-    height: .68rem;
+    /* height: .68rem; */
     line-height: .68rem;
     font-size: 16px;
 }
