@@ -159,7 +159,6 @@ export default {
     Array.prototype.diff = function(a) {
       return this.filter(function(i) {return a.indexOf(i) < 0;});
     };
-
   },
   async created(){
     let expoId = this.$route.query.expoId;
@@ -242,7 +241,6 @@ export default {
         //调用保存接口
         // data.disable = true;
         data.childList.forEach(el=>{
-          debugger
           // 给选对的计分
           if(el.checked === 1 && el.flag === data.checked) {
             this.right+=1;
@@ -507,7 +505,6 @@ export default {
             if(item.anType === 1) {
               //单选
               item.checked = ''
-              debugger
               item.childList.forEach(el => {
                 el.checked = 0;
                 let ansText = el.flag
